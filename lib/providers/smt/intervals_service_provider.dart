@@ -23,7 +23,7 @@ class IntervalsService {
 
   final DateFormat _formatter = DateFormat('MM/dd/yyyy');
 
-  Future<Map<String, dynamic>> fetchInterval({
+  Future<Map<String, dynamic>> fetchIntervals({
     required DateTime startDate,
     DateTime? endDate,
   }) async {
@@ -46,6 +46,4 @@ class IntervalsService {
       return Future.error('Failed to get token');
     }
   }
-  
-  // TODO: testing
 }
