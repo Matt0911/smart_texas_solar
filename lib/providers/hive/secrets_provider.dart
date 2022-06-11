@@ -22,6 +22,7 @@ class HiveSecretsDB {
 
   _init() async {
     Hive.registerAdapter(SecretsAdapter());
+    // TODO: use encrypted box
     _secretsBox = await Hive.openBox<Secrets>(secretsBoxName);
   }
 
@@ -40,6 +41,18 @@ class Secrets {
   String smtUser;
   @HiveField(1)
   String smtPass;
+  @HiveField(2)
+  String enphaseClientId;
+  @HiveField(3)
+  String enphaseClientSecret;
+  @HiveField(4)
+  String enphaseApiKey;
 
-  Secrets({this.smtUser = secrets.smtUser, this.smtPass = secrets.smtPass});
+  Secrets({
+    this.smtUser = secrets.smtUser,
+    this.smtPass = secrets.smtPass,
+    this.enphaseClientId = secrets.enphaseClientId,
+    this.enphaseClientSecret = secrets.enphaseClientSecret,
+    this.enphaseApiKey = secrets.enphaseApiKey,
+  });
 }

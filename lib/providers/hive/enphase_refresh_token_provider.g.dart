@@ -1,44 +1,38 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'secrets_provider.dart';
+part of 'enphase_refresh_token_provider.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class SecretsAdapter extends TypeAdapter<Secrets> {
+class EnphaseTokenResponseAdapter extends TypeAdapter<EnphaseTokenResponse> {
   @override
-  final int typeId = 1;
+  final int typeId = 2;
 
   @override
-  Secrets read(BinaryReader reader) {
+  EnphaseTokenResponse read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Secrets(
-      smtUser: fields[0] as String,
-      smtPass: fields[1] as String,
-      enphaseClientId: fields[2] as String,
-      enphaseClientSecret: fields[3] as String,
-      enphaseApiKey: fields[4] as String,
+    return EnphaseTokenResponse(
+      accessToken: fields[0] as String,
+      refreshToken: fields[1] as String,
+      expiresIn: fields[2] as int,
     );
   }
 
   @override
-  void write(BinaryWriter writer, Secrets obj) {
+  void write(BinaryWriter writer, EnphaseTokenResponse obj) {
     writer
-      ..writeByte(5)
-      ..writeByte(0)
-      ..write(obj.smtUser)
-      ..writeByte(1)
-      ..write(obj.smtPass)
-      ..writeByte(2)
-      ..write(obj.enphaseClientId)
       ..writeByte(3)
-      ..write(obj.enphaseClientSecret)
-      ..writeByte(4)
-      ..write(obj.enphaseApiKey);
+      ..writeByte(0)
+      ..write(obj.accessToken)
+      ..writeByte(1)
+      ..write(obj.refreshToken)
+      ..writeByte(2)
+      ..write(obj.expiresIn);
   }
 
   @override
@@ -47,7 +41,7 @@ class SecretsAdapter extends TypeAdapter<Secrets> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is SecretsAdapter &&
+      other is EnphaseTokenResponseAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

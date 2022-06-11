@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:smart_texas_solar/providers/enphase/token_service_provider.dart';
+import 'package:smart_texas_solar/providers/hive/enphase_refresh_token_provider.dart';
 import 'package:smart_texas_solar/providers/selected_dates_provider.dart';
 import 'package:smart_texas_solar/providers/smt/intervals_data_provider.dart';
 import 'package:smart_texas_solar/util/http_override.dart';
@@ -38,6 +40,7 @@ class HomePage extends ConsumerWidget {
   Widget build(context, ref) {
     var intervalsData = ref.watch(smtIntervalsDataProvider);
     var selectedDates = ref.watch(selectedDatesProvider);
+    var enphaseTokenService = ref.watch(enphaseTokenServiceProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Smart Texas Solar'),
@@ -63,16 +66,31 @@ class HomePage extends ConsumerWidget {
                 child: const Text('Select Dates')),
           ),
           Expanded(
-            child: Center(
-              child: intervalsData.when(
-                data: (t) => ListView.builder(
-                  itemBuilder: (context, i) =>
-                      Text(t.intervalData[i].toString()),
-                  itemCount: t.intervalData.length,
+            child: Row(
+              children: [
+                Expanded(
+                  child: intervalsData.when(
+                    data: (t) => ListView.builder(
+                      itemBuilder: (context, i) =>
+                          Text(t.intervalData[i].toString()),
+                      itemCount: t.intervalData.length,
+                    ),
+                    error: (e, s) => Text('$e with stack $s '),
+                    loading: () => const Text('loading'),
+                  ),
                 ),
-                error: (e, s) => const Text('error'),
-                loading: () => const Text('loading'),
-              ),
+                Expanded(
+                  child: FutureBuilder<String>(
+                      future: enphaseTokenService.getAccessToken(context),
+                      builder: ((context, snapshot) {
+                        if (snapshot.hasData) {
+                          return Text(snapshot.data!);
+                        } else {
+                          return Text('fetching token');
+                        }
+                      })),
+                )
+              ],
             ),
           ),
         ],
