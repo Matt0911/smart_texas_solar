@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:smart_texas_solar/providers/combined_intervals_data_provider.dart';
 import 'package:smart_texas_solar/providers/enphase/intervals_data_provider.dart';
 import 'package:smart_texas_solar/providers/selected_dates_provider.dart';
 import 'package:smart_texas_solar/providers/smt/intervals_data_provider.dart';
@@ -37,9 +38,8 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(context, ref) {
-    var smtIntervalsData = ref.watch(smtIntervalsDataProvider);
     var selectedDates = ref.watch(selectedDatesProvider);
-    var enphaseIntervalsData = ref.watch(enphaseIntervalsDataProvider(context));
+    var intervals = ref.watch(combinedIntervalsDataProvider(context));
     return Scaffold(
       appBar: AppBar(
         title: const Text('Smart Texas Solar'),
@@ -68,22 +68,11 @@ class HomePage extends ConsumerWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: smtIntervalsData.when(
-                    data: (t) => ListView.builder(
-                      itemBuilder: (context, i) => Text(
-                          '${t.consumptionData[i].toString()}\n${t.surplusData[i].toString()}'),
-                      itemCount: t.consumptionData.length,
-                    ),
-                    error: (e, s) => Text('$e with stack $s '),
-                    loading: () => const Text('loading'),
-                  ),
-                ),
-                Expanded(
-                  child: enphaseIntervalsData.when(
+                  child: intervals.when(
                     data: (t) => ListView.builder(
                       itemBuilder: (context, i) =>
-                          Text(t.generationData[i].toString()),
-                      itemCount: t.generationData.length,
+                          Text(t.intervalsData[i].toString()),
+                      itemCount: t.intervalsData.length,
                     ),
                     error: (e, s) => Text('$e with stack $s '),
                     loading: () => const Text('loading'),
