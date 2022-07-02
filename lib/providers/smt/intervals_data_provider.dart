@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_texas_solar/models/interval.dart';
 import 'package:smart_texas_solar/providers/selected_dates_provider.dart';
 import 'package:smart_texas_solar/providers/smt/intervals_service_provider.dart';
 
@@ -17,34 +18,20 @@ final smtIntervalsDataProvider = FutureProvider<SMTIntervalsData>((ref) async {
 
 final DateFormat _formatter = DateFormat('yyyy-MM-dd hh:mm a');
 
-class SMTInterval {
-  DateTime startTime;
-  DateTime endTime;
-  num consumption;
-  bool consumptionIsActual;
-  num generation;
-  bool generationIsActual;
-
-  SMTInterval.fromData(Map data)
-      : consumption = data['consumption'],
-        consumptionIsActual = data['consumption_est_act'] == 'A',
-        generation = data['generation'],
-        generationIsActual = data['generation_est_act'] == 'A',
-        startTime = _formatter.parse(
-            '${data['date']} ${data['starttime'].toString().trimLeft().toUpperCase()}'),
-        endTime = _formatter.parse(
-            '${data['date']} ${(data['endtime'].toString().trimLeft().toUpperCase())}');
-
-  @override
-  String toString() {
-    return '$startTime - c: $consumption, g: $generation';
-  }
-}
-
 class SMTIntervalsData {
-  List<SMTInterval> intervalData;
+  List<Interval> consumptionData;
+  List<Interval> surplusData;
   SMTIntervalsData(Map<String, dynamic> smtIntervalResponse)
-      : intervalData = (smtIntervalResponse['intervaldata'] as List)
-            .map((d) => SMTInterval.fromData(d))
+      : consumptionData = (smtIntervalResponse['intervaldata'] as List)
+            .map((d) => Interval(
+                endTime: _formatter.parse(
+                    '${d['date']} ${d['endtime'].toString().trimLeft().toUpperCase()}'),
+                kwh: d['consumption']))
+            .toList(),
+        surplusData = (smtIntervalResponse['intervaldata'] as List)
+            .map((d) => Interval(
+                endTime: _formatter.parse(
+                    '${d['date']} ${d['endtime'].toString().trimLeft().toUpperCase()}'),
+                kwh: d['generation']))
             .toList();
 }

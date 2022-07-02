@@ -29,6 +29,19 @@ class EnphaseTokenService {
 
   EnphaseTokenService.create(this._secretsDBFuture, this._enphaseTokenStore);
 
+  Future<Map<String, String>> get clientAuthHeader async {
+    Secrets secrets = (await _secretsDBFuture).getSecrets();
+    return {
+      'authorization':
+          'Basic ${base64Encode(utf8.encode('${secrets.enphaseClientId}:${secrets.enphaseClientSecret}'))}'
+    };
+  }
+
+  Future<Map<String, String>> get apiKeyQuery async {
+    Secrets secrets = (await _secretsDBFuture).getSecrets();
+    return {'key': secrets.enphaseApiKey};
+  }
+
   Future<EnphaseTokenResponse> _fetchTokens(String authCode) async {
     Secrets secrets = (await _secretsDBFuture).getSecrets();
     var url = Uri.https('api.enphaseenergy.com', '/oauth/token', {
@@ -37,10 +50,7 @@ class EnphaseTokenService {
       'code': authCode,
       'URL': 'https://api.enphaseenergy.com/oauth/token'
     });
-    String basicAuth =
-        'Basic ${base64Encode(utf8.encode('${secrets.enphaseClientId}:${secrets.enphaseClientSecret}'))}';
-    var response = await http
-        .post(url, headers: <String, String>{'authorization': basicAuth});
+    var response = await http.post(url, headers: (await clientAuthHeader));
     if (response.statusCode == 200) {
       var jsonResponse =
           convert.jsonDecode(response.body) as Map<String, dynamic>;
@@ -51,16 +61,11 @@ class EnphaseTokenService {
   }
 
   Future<EnphaseTokenResponse> _refreshTokens(String refreshToken) async {
-    Secrets secrets = (await _secretsDBFuture).getSecrets();
-    https: //api.enphaseenergy.com/oauth/token?grant_type=refresh_token&refresh_token=unique_refresh_token
     var url = Uri.https('api.enphaseenergy.com', '/oauth/token', {
       'grant_type': 'refresh_token',
       'refresh_token': refreshToken,
     });
-    String basicAuth =
-        'Basic ${base64Encode(utf8.encode('${secrets.enphaseClientId}:${secrets.enphaseClientSecret}'))}';
-    var response = await http
-        .post(url, headers: <String, String>{'authorization': basicAuth});
+    var response = await http.post(url, headers: (await clientAuthHeader));
     if (response.statusCode == 200) {
       var jsonResponse =
           convert.jsonDecode(response.body) as Map<String, dynamic>;
