@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:smart_texas_solar/models/combined_interval.dart';
+import 'package:smart_texas_solar/widgets/line_bar_combo_chart.dart';
 import 'package:smart_texas_solar/providers/combined_intervals_data_provider.dart';
-import 'package:smart_texas_solar/providers/enphase/intervals_data_provider.dart';
 import 'package:smart_texas_solar/providers/selected_dates_provider.dart';
-import 'package:smart_texas_solar/providers/smt/intervals_data_provider.dart';
 import 'package:smart_texas_solar/util/http_override.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -81,6 +82,46 @@ class HomePage extends ConsumerWidget {
               ],
             ),
           ),
+          Expanded(
+            child: intervals.when(
+              data: (t) => LineBarComboChart(
+                [
+                  charts.Series<CombinedInterval, DateTime>(
+                    id: 'Consumption',
+                    colorFn: (_, __) =>
+                        charts.MaterialPalette.blue.shadeDefault,
+                    domainFn: (CombinedInterval interval, _) =>
+                        interval.endTime,
+                    measureFn: (CombinedInterval interval, _) =>
+                        interval.kwhTotalConsumption,
+                    data: t.intervalsData,
+                  )..setAttribute(charts.rendererIdKey, 'customBar'),
+                  charts.Series<CombinedInterval, DateTime>(
+                    id: 'Production',
+                    colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
+                    domainFn: (CombinedInterval interval, _) =>
+                        interval.endTime,
+                    measureFn: (CombinedInterval interval, _) =>
+                        interval.kwhSolarProduction,
+                    data: t.intervalsData,
+                  )..setAttribute(charts.rendererIdKey, 'customBar'),
+                  charts.Series<CombinedInterval, DateTime>(
+                    id: 'Net',
+                    colorFn: (_, __) =>
+                        charts.MaterialPalette.green.shadeDefault,
+                    domainFn: (CombinedInterval interval, _) =>
+                        interval.endTime,
+                    measureFn: (CombinedInterval interval, _) =>
+                        interval.kwhTotalConsumption -
+                        interval.kwhSolarProduction,
+                    data: t.intervalsData,
+                  ),
+                ],
+              ),
+              error: (e, s) => Text('$e with stack $s '),
+              loading: () => const Text('loading'),
+            ),
+          )
         ],
       ),
     );
