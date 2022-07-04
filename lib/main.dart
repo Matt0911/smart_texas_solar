@@ -3,17 +3,28 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:smart_texas_solar/models/combined_interval.dart';
-import 'package:smart_texas_solar/widgets/line_bar_combo_chart.dart';
-import 'package:smart_texas_solar/providers/combined_intervals_data_provider.dart';
-import 'package:smart_texas_solar/providers/selected_dates_provider.dart';
-import 'package:smart_texas_solar/util/http_override.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+
+import 'models/combined_interval.dart';
+import 'models/enphase_intervals.dart';
+import 'models/interval.dart';
+import 'models/smt_intervals.dart';
+import 'providers/combined_intervals_data_provider.dart';
+import 'providers/hive/enphase_refresh_token_provider.dart';
+import 'providers/hive/secrets_provider.dart';
+import 'providers/selected_dates_provider.dart';
+import 'util/http_override.dart';
+import 'widgets/line_bar_combo_chart.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
   await Hive.initFlutter();
+  Hive.registerAdapter(SecretsAdapter());
+  Hive.registerAdapter(EnphaseTokenResponseAdapter());
+  Hive.registerAdapter(IntervalAdapter());
+  Hive.registerAdapter(SMTIntervalsAdapter());
+  Hive.registerAdapter(EnphaseIntervalsAdapter());
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -83,6 +94,7 @@ class HomePage extends ConsumerWidget {
             ),
           ),
           Expanded(
+            flex: 3,
             child: intervals.when(
               data: (t) => LineBarComboChart(
                 [

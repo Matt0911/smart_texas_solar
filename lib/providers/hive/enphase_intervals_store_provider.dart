@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
 
 import '../../models/enphase_intervals.dart';
-import '../../models/interval.dart';
 
 final enphaseIntervalsStoreProvider = FutureProvider<EnphaseIntervalsStore>(
     (_) => EnphaseIntervalsStore.create());
@@ -21,8 +20,6 @@ class EnphaseIntervalsStore {
   }
 
   _init() async {
-    Hive.registerAdapter(EnphaseIntervalsAdapter());
-    Hive.registerAdapter(IntervalAdapter());
     _box = await Hive.openBox<EnphaseIntervals>(boxName);
   }
 

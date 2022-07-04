@@ -46,7 +46,6 @@ class EnpahseTokenStore {
   }
 
   _init() async {
-    Hive.registerAdapter(EnphaseTokenResponseAdapter());
     // TODO: use encrypted box
     _tokensBox = await Hive.openBox<EnphaseTokenResponse>(boxName);
   }

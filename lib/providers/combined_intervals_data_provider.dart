@@ -5,6 +5,7 @@ import 'package:smart_texas_solar/providers/enphase/intervals_data_provider.dart
 import 'package:smart_texas_solar/providers/smt/intervals_data_provider.dart';
 
 import '../models/enphase_intervals.dart';
+import '../models/smt_intervals.dart';
 
 final combinedIntervalsDataProvider = FutureProvider.autoDispose
     .family<CombinedIntervalsData, BuildContext>((ref, context) async {
@@ -20,8 +21,7 @@ class CombinedIntervalsData {
   List<CombinedInterval> intervalsData;
 
   CombinedIntervalsData(
-      {required EnphaseIntervals enpahseData,
-      required SMTIntervalsData smtData})
+      {required EnphaseIntervals enpahseData, required SMTIntervals smtData})
       : intervalsData = enpahseData.generationData
             .asMap()
             .map(

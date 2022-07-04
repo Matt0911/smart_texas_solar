@@ -21,7 +21,6 @@ class HiveSecretsDB {
   }
 
   _init() async {
-    Hive.registerAdapter(SecretsAdapter());
     // TODO: use encrypted box
     _secretsBox = await Hive.openBox<Secrets>(secretsBoxName);
   }
