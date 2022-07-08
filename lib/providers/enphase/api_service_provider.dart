@@ -5,20 +5,26 @@ import 'package:intl/intl.dart';
 import 'package:smart_texas_solar/providers/enphase/token_service_provider.dart';
 import 'dart:convert' as convert;
 
+import 'package:smart_texas_solar/providers/hive/enphase_intervals_store_provider.dart';
+
+import '../../models/enphase_intervals.dart';
+
 final enphaseApiServiceProvider = Provider<EnphaseApiService>((ref) {
   var tokenService = ref.watch(enphaseTokenServiceProvider);
-  return EnphaseApiService(tokenService);
+  var enphaseDataStore = ref.watch(enphaseDataStoreProvider.future);
+  return EnphaseApiService(tokenService, enphaseDataStore);
 });
 
 class EnphaseApiService {
   final EnphaseTokenService _tokenService;
-  EnphaseApiService._create(this._tokenService);
+  final Future<EnphaseDataStore> _futureDataStore;
+  EnphaseApiService._create(this._tokenService, this._futureDataStore);
 
-  EnphaseApiService(this._tokenService);
+  EnphaseApiService(this._tokenService, this._futureDataStore);
 
-  static Future<EnphaseApiService> create(
-      EnphaseTokenService tokenController) async {
-    final component = EnphaseApiService._create(tokenController);
+  static Future<EnphaseApiService> create(EnphaseTokenService tokenController,
+      Future<EnphaseDataStore> dataStore) async {
+    final component = EnphaseApiService._create(tokenController, dataStore);
     // await component.fetchInterval();
     return component;
   }
@@ -26,6 +32,12 @@ class EnphaseApiService {
   final DateFormat _formatter = DateFormat('MM/dd/yyyy');
 
   Future<String> _fetchSystemId(BuildContext context) async {
+    var dataStore = await _futureDataStore;
+    String? systemId = dataStore.getSystemId();
+    if (systemId != null) {
+      return systemId;
+    }
+
     var url = Uri.https('api.enphaseenergy.com', '/api/v4/systems',
         (await _tokenService.apiKeyQuery));
     String token = await _tokenService.getAccessToken(context);
@@ -36,19 +48,29 @@ class EnphaseApiService {
       var jsonResponse =
           convert.jsonDecode(response.body) as Map<String, dynamic>;
 
-      return jsonResponse['systems'][0]['system_id'].toString();
+      String systemId = jsonResponse['systems'][0]['system_id'].toString();
+      dataStore.storeSystemId(systemId);
+      return systemId;
     } else {
       print('Request failed with status: ${response.statusCode}.');
       return Future.error('Failed to get enphase systems');
     }
   }
 
-  Future<Map<String, dynamic>> fetchIntervals({
+  Future<EnphaseIntervals> fetchIntervals({
     required BuildContext context,
     required DateTime startDate,
     DateTime? endDate,
   }) async {
     String systemId = await _fetchSystemId(context);
+
+    // TODO: handle multiple days selected
+    var dataStore = await _futureDataStore;
+    var intervalsData = dataStore.getIntervals(startDate);
+    if (intervalsData != null) {
+      return intervalsData;
+    }
+
     String token = await _tokenService.getAccessToken(context);
     DateTime startDateStartOfDay =
         DateTime(startDate.year, startDate.month, startDate.day);
@@ -70,7 +92,9 @@ class EnphaseApiService {
       var jsonResponse =
           convert.jsonDecode(response.body) as Map<String, dynamic>;
 
-      return jsonResponse;
+      var fetchedIntervals = EnphaseIntervals.fromData(jsonResponse);
+      dataStore.storeIntervals(fetchedIntervals, startDate);
+      return fetchedIntervals;
     } else {
       print('Request failed with status: ${response.statusCode}.');
       return Future.error('Failed to get token');

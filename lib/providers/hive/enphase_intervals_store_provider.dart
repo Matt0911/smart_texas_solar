@@ -3,33 +3,42 @@ import 'package:hive_flutter/adapters.dart';
 
 import '../../models/enphase_intervals.dart';
 
-final enphaseIntervalsStoreProvider = FutureProvider<EnphaseIntervalsStore>(
-    (_) => EnphaseIntervalsStore.create());
+final enphaseDataStoreProvider =
+    FutureProvider<EnphaseDataStore>((_) => EnphaseDataStore.create());
 
-const String boxName = 'enphaseIntervals';
+const String coreBoxName = 'enphaseData';
+const String intervalsBoxName = 'enphaseIntervals';
+const String systemIdKey = 'sysid';
 
-class EnphaseIntervalsStore {
-  late Box _box;
+class EnphaseDataStore {
+  late Box<String> _coreBox;
+  late Box<EnphaseIntervals> _intervalsBox;
 
-  EnphaseIntervalsStore._create();
+  EnphaseDataStore._create();
 
-  static Future<EnphaseIntervalsStore> create() async {
-    final component = EnphaseIntervalsStore._create();
+  static Future<EnphaseDataStore> create() async {
+    final component = EnphaseDataStore._create();
     await component._init();
     return component;
   }
 
   _init() async {
-    _box = await Hive.openBox<EnphaseIntervals>(boxName);
+    _coreBox = await Hive.openBox<String>(coreBoxName);
+    _intervalsBox = await Hive.openBox<EnphaseIntervals>(intervalsBoxName);
   }
 
-  String _getKey(DateTime day) => '${day.year}-${day.month}-${day.day}';
+  String _getIntervalKey(DateTime day) => '${day.year}-${day.month}-${day.day}';
 
   storeIntervals(EnphaseIntervals data, DateTime day) {
-    _box.put(_getKey(day), data);
+    _intervalsBox.put(_getIntervalKey(day), data);
   }
 
   EnphaseIntervals? getIntervals(DateTime day) {
-    return _box.get(_getKey(day));
+    return _intervalsBox.get(_getIntervalKey(day));
+  }
+
+  String? getSystemId() => _coreBox.get(systemIdKey);
+  storeSystemId(String systemId) {
+    _coreBox.put(systemIdKey, systemId);
   }
 }
