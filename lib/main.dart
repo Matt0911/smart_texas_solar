@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:intl/intl.dart';
 
 import 'models/combined_interval.dart';
 import 'models/enphase_intervals.dart';
@@ -45,6 +46,14 @@ class MyApp extends StatelessWidget {
   }
 }
 
+final _formatter = DateFormat('MMM dd, yyyy');
+String getSelectedDateText(DateTime start, DateTime end) {
+  var startStr = _formatter.format(start);
+  var endStr = _formatter.format(end);
+  if (startStr == endStr) return startStr;
+  return '$startStr - $endStr';
+}
+
 class HomePage extends ConsumerWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -58,23 +67,35 @@ class HomePage extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          Center(
-            child: ElevatedButton(
-                onPressed: () async {
-                  DateTimeRange? range = await showDateRangePicker(
-                      context: context,
-                      firstDate: DateTime(2010),
-                      lastDate:
-                          DateTime.now().subtract(const Duration(days: 2)),
-                      initialDateRange: DateTimeRange(
-                          start: selectedDates.startDate,
-                          end: selectedDates.endDate));
-                  if (range != null) {
-                    selectedDates.updateDates(
-                        start: range.start, end: range.end);
-                  }
-                },
-                child: const Text('Select Dates')),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Text(
+                  getSelectedDateText(
+                      selectedDates.startDate, selectedDates.endDate),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    DateTimeRange? range = await showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime(2010),
+                        lastDate:
+                            DateTime.now().subtract(const Duration(days: 2)),
+                        initialDateRange: DateTimeRange(
+                            start: selectedDates.startDate,
+                            end: selectedDates.endDate));
+                    if (range != null) {
+                      selectedDates.updateDates(
+                          start: range.start, end: range.end);
+                    }
+                  },
+                  child: const Text('Select Dates'),
+                )
+              ],
+            ),
           ),
           Expanded(
             child: Row(
@@ -101,7 +122,7 @@ class HomePage extends ConsumerWidget {
                   charts.Series<CombinedInterval, DateTime>(
                     id: 'Consumption',
                     colorFn: (_, __) =>
-                        charts.MaterialPalette.blue.shadeDefault,
+                        const charts.Color(r: 214, g: 144, b: 2),
                     domainFn: (interval, _) => interval.endTime,
                     measureFn: (interval, _) => -interval.kwhTotalConsumption,
                     data: t.intervalsData,
@@ -126,7 +147,7 @@ class HomePage extends ConsumerWidget {
                                 interval.kwhSolarProduction >
                             0
                         ? charts.MaterialPalette.red.shadeDefault
-                        : charts.MaterialPalette.green.shadeDefault,
+                        : const charts.Color(r: 24, g: 237, b: 7),
                     domainFn: (interval, _) => interval.endTime,
                     measureFn: (interval, _) =>
                         interval.kwhSolarProduction -

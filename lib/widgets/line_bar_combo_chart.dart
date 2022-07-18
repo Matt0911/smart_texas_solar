@@ -27,60 +27,20 @@ class LineBarComboChart extends StatelessWidget {
       customSeriesRenderers: [
         charts.BarRendererConfig(customRendererId: 'customBar')
       ],
+      primaryMeasureAxis: const charts.NumericAxisSpec(
+          renderSpec: charts.GridlineRendererSpec(
+              lineStyle: charts.LineStyleSpec(
+                  color: charts.Color(r: 100, g: 100, b: 100)),
+              labelStyle: charts.TextStyleSpec(
+                  color: charts.Color(r: 255, g: 255, b: 255)))),
+      domainAxis: const charts.DateTimeAxisSpec(
+          renderSpec: charts.GridlineRendererSpec(
+              lineStyle: charts.LineStyleSpec(
+                  color: charts.Color(r: 100, g: 100, b: 100)),
+              labelStyle: charts.TextStyleSpec(
+                  color: charts.Color(r: 255, g: 255, b: 255)))),
     );
   }
-
-  // /// Create one series with sample hard coded data.
-  // static List<charts.Series<LinearSales, int>> _createSampleData() {
-  //   final desktopSalesData = [
-  //     LinearSales(0, 5),
-  //     LinearSales(1, 25),
-  //     LinearSales(2, 100),
-  //     LinearSales(3, 75),
-  //   ];
-
-  //   final tableSalesData = [
-  //     LinearSales(0, 5),
-  //     LinearSales(1, 25),
-  //     LinearSales(2, 100),
-  //     LinearSales(3, 75),
-  //   ];
-
-  //   final mobileSalesData = [
-  //     LinearSales(0, 10),
-  //     LinearSales(1, 50),
-  //     LinearSales(2, 200),
-  //     LinearSales(3, 150),
-  //   ];
-
-  //   return [
-  //     charts.Series<LinearSales, int>(
-
-  //       id: 'Desktop',
-  //       colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-  //       domainFn: (LinearSales sales, _) => sales.year,
-  //       measureFn: (LinearSales sales, _) => sales.sales,
-  //       data: desktopSalesData,
-  //     )
-  //       // Configure our custom bar renderer for this series.
-  //       ..setAttribute(charts.rendererIdKey, 'customBar'),
-  //     charts.Series<LinearSales, int>(
-  //       id: 'Tablet',
-  //       colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
-  //       domainFn: (LinearSales sales, _) => sales.year,
-  //       measureFn: (LinearSales sales, _) => sales.sales,
-  //       data: tableSalesData,
-  //     )
-  //       // Configure our custom bar renderer for this series.
-  //       ..setAttribute(charts.rendererIdKey, 'customBar'),
-  //     charts.Series<LinearSales, int>(
-  //         id: 'Mobile',
-  //         colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
-  //         domainFn: (LinearSales sales, _) => sales.year,
-  //         measureFn: (LinearSales sales, _) => sales.sales,
-  //         data: mobileSalesData),
-  //   ];
-  // }
 }
 
 /// Sample linear data type.
