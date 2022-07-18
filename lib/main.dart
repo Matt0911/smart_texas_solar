@@ -102,30 +102,35 @@ class HomePage extends ConsumerWidget {
                     id: 'Consumption',
                     colorFn: (_, __) =>
                         charts.MaterialPalette.blue.shadeDefault,
-                    domainFn: (CombinedInterval interval, _) =>
-                        interval.endTime,
-                    measureFn: (CombinedInterval interval, _) =>
-                        interval.kwhTotalConsumption,
+                    domainFn: (interval, _) => interval.endTime,
+                    measureFn: (interval, _) => -interval.kwhTotalConsumption,
                     data: t.intervalsData,
                   )..setAttribute(charts.rendererIdKey, 'customBar'),
                   charts.Series<CombinedInterval, DateTime>(
                     id: 'Production',
-                    colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
-                    domainFn: (CombinedInterval interval, _) =>
-                        interval.endTime,
-                    measureFn: (CombinedInterval interval, _) =>
-                        interval.kwhSolarProduction,
+                    colorFn: (_, __) =>
+                        charts.MaterialPalette.green.shadeDefault,
+                    domainFn: (interval, _) => interval.endTime,
+                    measureFn: (interval, _) => interval.kwhSolarProduction,
                     data: t.intervalsData,
                   )..setAttribute(charts.rendererIdKey, 'customBar'),
                   charts.Series<CombinedInterval, DateTime>(
                     id: 'Net',
-                    colorFn: (_, __) =>
-                        charts.MaterialPalette.green.shadeDefault,
-                    domainFn: (CombinedInterval interval, _) =>
-                        interval.endTime,
-                    measureFn: (CombinedInterval interval, _) =>
+                    areaColorFn: (interval, __) =>
                         interval.kwhTotalConsumption -
-                        interval.kwhSolarProduction,
+                                    interval.kwhSolarProduction >
+                                0
+                            ? charts.MaterialPalette.red.shadeDefault
+                            : charts.MaterialPalette.green.shadeDefault,
+                    colorFn: (interval, __) => interval.kwhTotalConsumption -
+                                interval.kwhSolarProduction >
+                            0
+                        ? charts.MaterialPalette.red.shadeDefault
+                        : charts.MaterialPalette.green.shadeDefault,
+                    domainFn: (interval, _) => interval.endTime,
+                    measureFn: (interval, _) =>
+                        interval.kwhSolarProduction -
+                        interval.kwhTotalConsumption,
                     data: t.intervalsData,
                   ),
                 ],

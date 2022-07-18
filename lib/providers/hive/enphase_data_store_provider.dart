@@ -25,6 +25,7 @@ class EnphaseDataStore {
   _init() async {
     _coreBox = await Hive.openBox<String>(coreBoxName);
     _intervalsBox = await Hive.openBox<EnphaseIntervals>(intervalsBoxName);
+    // resetIntervalsStore();
   }
 
   String _getIntervalKey(DateTime day) => '${day.year}-${day.month}-${day.day}';
@@ -33,8 +34,28 @@ class EnphaseDataStore {
     _intervalsBox.put(_getIntervalKey(day), data);
   }
 
+  storeManyIntervals(Map<DateTime, EnphaseIntervals> data) {
+    data.forEach((date, intervals) {
+      storeIntervals(intervals, date);
+    });
+  }
+
   EnphaseIntervals? getIntervals(DateTime day) {
     return _intervalsBox.get(_getIntervalKey(day));
+  }
+
+  List<EnphaseIntervals>? getIntervalsList(List<DateTime> dates) {
+    List<EnphaseIntervals> stored = [];
+    for (var d in dates) {
+      var data = _intervalsBox.get(_getIntervalKey(d));
+      if (data == null) return null;
+      stored.add(data);
+    }
+    return stored;
+  }
+
+  resetIntervalsStore() {
+    _intervalsBox.deleteAll(_intervalsBox.keys);
   }
 
   String? getSystemId() => _coreBox.get(systemIdKey);

@@ -5,11 +5,22 @@ final selectedDatesProvider = ChangeNotifierProvider((ref) {
   return SelectedDates();
 });
 
+DateTime _getDateFromToday(int deltaDays, bool endOfDay) {
+  var now = DateTime.now();
+  return DateTime(
+    now.year,
+    now.month,
+    now.day + deltaDays,
+    endOfDay ? 23 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 59 : 0,
+  );
+}
+
 class SelectedDates extends ChangeNotifier {
   SelectedDates({DateTime? startDate, DateTime? endDate})
-      : startDate =
-            startDate ?? DateTime.now().subtract(const Duration(days: 2)),
-        endDate = endDate ?? DateTime.now().subtract(const Duration(days: 2));
+      : startDate = startDate ?? _getDateFromToday(-2, false),
+        endDate = endDate ?? _getDateFromToday(-2, true);
 
   DateTime startDate;
   DateTime endDate;
@@ -19,7 +30,7 @@ class SelectedDates extends ChangeNotifier {
       startDate = start;
     }
     if (end != null) {
-      endDate = end;
+      endDate = DateTime(end.year, end.month, end.day, 23, 59, 59);
     }
     notifyListeners();
   }

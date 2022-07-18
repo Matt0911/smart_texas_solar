@@ -4,29 +4,43 @@ import 'package:intl/intl.dart';
 import 'dart:convert' as convert;
 import 'package:smart_texas_solar/providers/smt/token_service_provider.dart';
 
-final smtIntervalsServiceProvider =
-    FutureProvider<IntervalsService>((ref) async {
+import '../../models/smt_intervals.dart';
+import '../../util/date_util.dart';
+import '../hive/smt_data_store_provider.dart';
+
+final smtApiServiceProvider = FutureProvider<IntervalsService>((ref) async {
   TokenService tokenController =
       await ref.watch(smtTokenServiceProvider.future);
-  return IntervalsService.create(tokenController);
+  SMTDataStore intervalsStore = await ref.watch(smtDataStoreProvider.future);
+  return IntervalsService.create(tokenController, intervalsStore);
 });
 
 class IntervalsService {
   final TokenService _tokenController;
-  IntervalsService._create(this._tokenController);
+  final SMTDataStore _dataStore;
+  IntervalsService._create(this._tokenController, this._dataStore);
 
-  static Future<IntervalsService> create(TokenService tokenController) async {
-    final component = IntervalsService._create(tokenController);
-    // await component.fetchInterval();
+  static Future<IntervalsService> create(
+    TokenService tokenController,
+    SMTDataStore intervalsStore,
+  ) async {
+    final component = IntervalsService._create(tokenController, intervalsStore);
     return component;
   }
 
   final DateFormat _formatter = DateFormat('MM/dd/yyyy');
 
-  Future<Map<String, dynamic>> fetchIntervals({
+  Future<SMTIntervals> fetchIntervals({
     required DateTime startDate,
     DateTime? endDate,
   }) async {
+    var dates = getDateListFromRange(startDate, endDate ?? startDate);
+
+    var intervalsData = _dataStore.getIntervalsList(dates);
+    if (intervalsData != null) {
+      return SMTIntervals.combine(intervalsData);
+    }
+
     var url = Uri.https('smartmetertexas.com', '/api/usage/interval');
     String token = await _tokenController.token;
     var response = await http.post(url, headers: {
@@ -40,7 +54,9 @@ class IntervalsService {
       var jsonResponse =
           convert.jsonDecode(response.body) as Map<String, dynamic>;
 
-      return jsonResponse;
+      var fetchedIntervals = SMTIntervals.fromData(jsonResponse);
+      _dataStore.storeManyIntervals(fetchedIntervals.splitIntoDays());
+      return fetchedIntervals;
     } else {
       print('Request failed with status: ${response.statusCode}.');
       return Future.error('Failed to get token');
