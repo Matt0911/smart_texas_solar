@@ -28,6 +28,8 @@ class LineBarComboChart extends StatelessWidget {
         charts.BarRendererConfig(customRendererId: 'customBar')
       ],
       primaryMeasureAxis: const charts.NumericAxisSpec(
+          tickProviderSpec:
+              charts.BasicNumericTickProviderSpec(dataIsInWholeNumbers: false),
           renderSpec: charts.GridlineRendererSpec(
               lineStyle: charts.LineStyleSpec(
                   color: charts.Color(r: 100, g: 100, b: 100)),
@@ -41,12 +43,4 @@ class LineBarComboChart extends StatelessWidget {
                   color: charts.Color(r: 255, g: 255, b: 255)))),
     );
   }
-}
-
-/// Sample linear data type.
-class LinearSales {
-  final int year;
-  final int sales;
-
-  LinearSales(this.year, this.sales);
 }

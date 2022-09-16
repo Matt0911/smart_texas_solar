@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
+import 'package:smart_texas_solar/widgets/number_card.dart';
 
 import 'models/combined_interval.dart';
 import 'models/enphase_intervals.dart';
@@ -62,11 +63,10 @@ class HomePage extends ConsumerWidget {
     var selectedDates = ref.watch(selectedDatesProvider);
     var intervals = ref.watch(combinedIntervalsDataProvider(context));
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Smart Texas Solar'),
-      ),
-      body: Column(
-        children: [
+        appBar: AppBar(
+          title: const Text('Smart Texas Solar'),
+        ),
+        body: Column(children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -97,71 +97,126 @@ class HomePage extends ConsumerWidget {
               ],
             ),
           ),
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: intervals.when(
-                    data: (t) => ListView.builder(
-                      itemBuilder: (context, i) =>
-                          Text(t.intervalsData[i].toString()),
-                      itemCount: t.intervalsData.length,
+          intervals.when(
+            data: (combinedIntervals) {
+              num totalConsumption = combinedIntervals.intervalsData
+                  .fold<num>(0, (sum, i) => sum + i.kwhTotalConsumption);
+              num totalGrid = combinedIntervals.intervalsData
+                  .fold<num>(0, (sum, i) => sum + i.kwhGridConsumption);
+              num totalProduction = combinedIntervals.intervalsData
+                  .fold<num>(0, (sum, i) => sum + i.kwhSolarProduction);
+              num totalSurplus = combinedIntervals.intervalsData
+                  .fold<num>(0, (sum, i) => sum + i.kwhSurplusGeneration);
+              num totalNet = totalProduction - totalConsumption;
+              return Expanded(
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      // crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              NumberCard(
+                                title: 'Production',
+                                value: totalProduction,
+                                valueColor: Colors.green.shade500,
+                                valueUnits: 'kWh',
+                              ),
+                              NumberCard(
+                                title: 'Surplus',
+                                value: totalSurplus,
+                                valueColor: Colors.green.shade500,
+                                valueUnits: 'kWh',
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              NumberCard(
+                                title: 'Consumption',
+                                value: totalConsumption,
+                                valueColor: Colors.red.shade900,
+                                valueUnits: 'kWh',
+                              ),
+                              NumberCard(
+                                title: 'Grid Cons.',
+                                value: totalGrid,
+                                valueColor: Colors.red.shade900,
+                                valueUnits: 'kWh',
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: NumberCard(
+                            title: 'Net',
+                            value: totalNet,
+                            valueColor: totalNet >= 0
+                                ? Colors.green.shade500
+                                : Colors.red.shade900,
+                            valueUnits: 'kWh',
+                          ),
+                        ),
+                      ],
                     ),
-                    error: (e, s) => Text('$e with stack $s '),
-                    loading: () => const Text('loading'),
-                  ),
+                    Expanded(
+                      flex: 3,
+                      child: LineBarComboChart(
+                        [
+                          charts.Series<CombinedInterval, DateTime>(
+                            id: 'Consumption',
+                            colorFn: (_, __) =>
+                                const charts.Color(r: 214, g: 144, b: 2),
+                            domainFn: (interval, _) => interval.endTime,
+                            measureFn: (interval, _) =>
+                                -interval.kwhTotalConsumption,
+                            data: combinedIntervals.intervalsData,
+                          )..setAttribute(charts.rendererIdKey, 'customBar'),
+                          charts.Series<CombinedInterval, DateTime>(
+                            id: 'Production',
+                            colorFn: (_, __) =>
+                                charts.MaterialPalette.green.shadeDefault,
+                            domainFn: (interval, _) => interval.endTime,
+                            measureFn: (interval, _) =>
+                                interval.kwhSolarProduction,
+                            data: combinedIntervals.intervalsData,
+                          )..setAttribute(charts.rendererIdKey, 'customBar'),
+                          charts.Series<CombinedInterval, DateTime>(
+                            id: 'Net',
+                            areaColorFn: (interval, __) =>
+                                interval.kwhTotalConsumption -
+                                            interval.kwhSolarProduction >
+                                        0
+                                    ? charts.MaterialPalette.red.shadeDefault
+                                    : charts.MaterialPalette.green.shadeDefault,
+                            colorFn: (interval, __) =>
+                                interval.kwhTotalConsumption -
+                                            interval.kwhSolarProduction >
+                                        0
+                                    ? charts.MaterialPalette.red.shadeDefault
+                                    : const charts.Color(r: 24, g: 237, b: 7),
+                            domainFn: (interval, _) => interval.endTime,
+                            measureFn: (interval, _) =>
+                                interval.kwhSolarProduction -
+                                interval.kwhTotalConsumption,
+                            data: combinedIntervals.intervalsData,
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
+            error: (e, s) => Text('$e with stack $s '),
+            loading: () => const Text('loading'),
           ),
-          Expanded(
-            flex: 3,
-            child: intervals.when(
-              data: (t) => LineBarComboChart(
-                [
-                  charts.Series<CombinedInterval, DateTime>(
-                    id: 'Consumption',
-                    colorFn: (_, __) =>
-                        const charts.Color(r: 214, g: 144, b: 2),
-                    domainFn: (interval, _) => interval.endTime,
-                    measureFn: (interval, _) => -interval.kwhTotalConsumption,
-                    data: t.intervalsData,
-                  )..setAttribute(charts.rendererIdKey, 'customBar'),
-                  charts.Series<CombinedInterval, DateTime>(
-                    id: 'Production',
-                    colorFn: (_, __) =>
-                        charts.MaterialPalette.green.shadeDefault,
-                    domainFn: (interval, _) => interval.endTime,
-                    measureFn: (interval, _) => interval.kwhSolarProduction,
-                    data: t.intervalsData,
-                  )..setAttribute(charts.rendererIdKey, 'customBar'),
-                  charts.Series<CombinedInterval, DateTime>(
-                    id: 'Net',
-                    areaColorFn: (interval, __) =>
-                        interval.kwhTotalConsumption -
-                                    interval.kwhSolarProduction >
-                                0
-                            ? charts.MaterialPalette.red.shadeDefault
-                            : charts.MaterialPalette.green.shadeDefault,
-                    colorFn: (interval, __) => interval.kwhTotalConsumption -
-                                interval.kwhSolarProduction >
-                            0
-                        ? charts.MaterialPalette.red.shadeDefault
-                        : const charts.Color(r: 24, g: 237, b: 7),
-                    domainFn: (interval, _) => interval.endTime,
-                    measureFn: (interval, _) =>
-                        interval.kwhSolarProduction -
-                        interval.kwhTotalConsumption,
-                    data: t.intervalsData,
-                  ),
-                ],
-              ),
-              error: (e, s) => Text('$e with stack $s '),
-              loading: () => const Text('loading'),
-            ),
-          )
-        ],
-      ),
-    );
+        ]));
   }
 }
