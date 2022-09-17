@@ -15,7 +15,7 @@ Map<IntervalTime, Interval> _convertListToMap(List<Interval> intervalList) {
 }
 
 class IntervalMap {
-  final Map<IntervalTime, Interval> intervals;
+  Map<IntervalTime, Interval> intervals;
 
   IntervalMap(List<Interval> intervalList)
       : intervals = _convertListToMap(intervalList);
@@ -25,6 +25,12 @@ class IntervalMap {
           .format(endDate.subtract(const Duration(minutes: 15))))];
 
   Interval? getInterval(IntervalTime time) => intervals[time];
+
+  addInterval(Interval interval) {
+    var key = IntervalTime.values.byName(intervalTimeFormat
+        .format(interval.endTime.subtract(const Duration(minutes: 15))));
+    intervals[key] = interval;
+  }
 }
 
 enum IntervalTime {

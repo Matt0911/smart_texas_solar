@@ -30,15 +30,15 @@ class IntervalsService {
 
   final DateFormat _formatter = DateFormat('MM/dd/yyyy');
 
-  Future<SMTIntervals> fetchIntervals({
+  Future<Map<DateTime, SMTIntervals>> fetchIntervals({
     required DateTime startDate,
     DateTime? endDate,
   }) async {
     var dates = getDateListFromRange(startDate, endDate ?? startDate);
 
-    var intervalsData = _dataStore.getIntervalsList(dates);
+    var intervalsData = _dataStore.getStoredIntervals(dates);
     if (intervalsData != null) {
-      return SMTIntervals.combine(intervalsData);
+      return intervalsData;
     }
 
     var url = Uri.https('smartmetertexas.com', '/api/usage/interval');
@@ -55,8 +55,9 @@ class IntervalsService {
           convert.jsonDecode(response.body) as Map<String, dynamic>;
 
       var fetchedIntervals = SMTIntervals.fromData(jsonResponse);
-      _dataStore.storeManyIntervals(fetchedIntervals.splitIntoDays());
-      return fetchedIntervals;
+      var intervalsMap = fetchedIntervals.splitIntoDays();
+      _dataStore.storeManyIntervals(intervalsMap);
+      return intervalsMap;
     } else {
       print('Request failed with status: ${response.statusCode}.');
       return Future.error('Failed to get token');

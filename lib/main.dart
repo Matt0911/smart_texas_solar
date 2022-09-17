@@ -99,15 +99,11 @@ class HomePage extends ConsumerWidget {
           ),
           intervals.when(
             data: (combinedIntervals) {
-              num totalConsumption = combinedIntervals.intervalsData
-                  .fold<num>(0, (sum, i) => sum + i.kwhTotalConsumption);
-              num totalGrid = combinedIntervals.intervalsData
-                  .fold<num>(0, (sum, i) => sum + i.kwhGridConsumption);
-              num totalProduction = combinedIntervals.intervalsData
-                  .fold<num>(0, (sum, i) => sum + i.kwhSolarProduction);
-              num totalSurplus = combinedIntervals.intervalsData
-                  .fold<num>(0, (sum, i) => sum + i.kwhSurplusGeneration);
-              num totalNet = totalProduction - totalConsumption;
+              num totalConsumption = combinedIntervals.totalConsumption;
+              num totalGrid = combinedIntervals.totalGrid;
+              num totalProduction = combinedIntervals.totalProduction;
+              num totalSurplus = combinedIntervals.totalSurplus;
+              num totalNet = combinedIntervals.totalNet;
               return Expanded(
                 child: Column(
                   children: [
@@ -176,7 +172,7 @@ class HomePage extends ConsumerWidget {
                             domainFn: (interval, _) => interval.endTime,
                             measureFn: (interval, _) =>
                                 -interval.kwhTotalConsumption,
-                            data: combinedIntervals.intervalsData,
+                            data: combinedIntervals.intervalsList,
                           )..setAttribute(charts.rendererIdKey, 'customBar'),
                           charts.Series<CombinedInterval, DateTime>(
                             id: 'Production',
@@ -185,7 +181,7 @@ class HomePage extends ConsumerWidget {
                             domainFn: (interval, _) => interval.endTime,
                             measureFn: (interval, _) =>
                                 interval.kwhSolarProduction,
-                            data: combinedIntervals.intervalsData,
+                            data: combinedIntervals.intervalsList,
                           )..setAttribute(charts.rendererIdKey, 'customBar'),
                           charts.Series<CombinedInterval, DateTime>(
                             id: 'Net',
@@ -205,7 +201,7 @@ class HomePage extends ConsumerWidget {
                             measureFn: (interval, _) =>
                                 interval.kwhSolarProduction -
                                 interval.kwhTotalConsumption,
-                            data: combinedIntervals.intervalsData,
+                            data: combinedIntervals.intervalsList,
                           ),
                         ],
                       ),

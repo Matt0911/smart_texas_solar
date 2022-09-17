@@ -34,6 +34,7 @@ class EnphaseIntervals {
 
   _addInterval(Interval interval) {
     generationData.add(interval);
+    generationMap.addInterval(interval);
   }
 
   Map<DateTime, EnphaseIntervals> splitIntoDays() {

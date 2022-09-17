@@ -6,7 +6,8 @@ import 'package:smart_texas_solar/providers/selected_dates_provider.dart';
 import '../../models/enphase_intervals.dart';
 
 final enphaseIntervalsDataProvider = FutureProvider.autoDispose
-    .family<EnphaseIntervals, BuildContext>((ref, context) async {
+    .family<Map<DateTime, EnphaseIntervals>, BuildContext>(
+        (ref, context) async {
   EnphaseApiService apiService = ref.watch(enphaseApiServiceProvider);
   SelectedDates selectedDates = ref.watch(selectedDatesProvider);
 

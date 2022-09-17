@@ -44,12 +44,12 @@ class EnphaseDataStore {
     return _intervalsBox.get(_getIntervalKey(day));
   }
 
-  List<EnphaseIntervals>? getIntervalsList(List<DateTime> dates) {
-    List<EnphaseIntervals> stored = [];
+  Map<DateTime, EnphaseIntervals>? getStoredIntervals(List<DateTime> dates) {
+    Map<DateTime, EnphaseIntervals> stored = {};
     for (var d in dates) {
       var data = _intervalsBox.get(_getIntervalKey(d));
       if (data == null) return null;
-      stored.add(data);
+      stored[d] = data;
     }
     return stored;
   }

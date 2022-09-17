@@ -4,7 +4,8 @@ import 'package:smart_texas_solar/providers/smt/api_service_provider.dart';
 
 import '../../models/smt_intervals.dart';
 
-final smtIntervalsDataProvider = FutureProvider<SMTIntervals>((ref) async {
+final smtIntervalsDataProvider =
+    FutureProvider<Map<DateTime, SMTIntervals>>((ref) async {
   IntervalsService intervalsService =
       await ref.watch(smtApiServiceProvider.future);
   SelectedDates selectedDates = ref.watch(selectedDatesProvider);

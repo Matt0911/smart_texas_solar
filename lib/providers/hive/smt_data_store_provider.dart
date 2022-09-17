@@ -41,12 +41,12 @@ class SMTDataStore {
     return _intervalsBox.get(_getKey(day));
   }
 
-  List<SMTIntervals>? getIntervalsList(List<DateTime> dates) {
-    List<SMTIntervals> stored = [];
+  Map<DateTime, SMTIntervals>? getStoredIntervals(List<DateTime> dates) {
+    Map<DateTime, SMTIntervals> stored = {};
     for (var d in dates) {
       var data = _intervalsBox.get(_getKey(d));
       if (data == null) return null;
-      stored.add(data);
+      stored[d] = data;
     }
     return stored;
   }

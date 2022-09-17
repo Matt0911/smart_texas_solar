@@ -56,10 +56,12 @@ class SMTIntervals {
 
   _addConsumptionInterval(Interval interval) {
     consumptionData.add(interval);
+    consumptionMap.addInterval(interval);
   }
 
   _addSurplusInterval(Interval interval) {
     surplusData.add(interval);
+    surplusMap.addInterval(interval);
   }
 
   Map<DateTime, SMTIntervals> splitIntoDays() {

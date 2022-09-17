@@ -56,7 +56,7 @@ class EnphaseApiService {
     }
   }
 
-  Future<EnphaseIntervals> fetchIntervals({
+  Future<Map<DateTime, EnphaseIntervals>> fetchIntervals({
     required BuildContext context,
     required DateTime startDate,
     DateTime? endDate,
@@ -66,9 +66,9 @@ class EnphaseApiService {
     var dates = getDateListFromRange(startDate, endDate ?? startDate);
 
     var dataStore = await _futureDataStore;
-    var intervalsData = dataStore.getIntervalsList(dates);
+    var intervalsData = dataStore.getStoredIntervals(dates);
     if (intervalsData != null) {
-      return EnphaseIntervals.combine(intervalsData);
+      return intervalsData;
     }
 
     String token = await _tokenService.getAccessToken(context);
@@ -90,8 +90,9 @@ class EnphaseApiService {
           convert.jsonDecode(response.body) as Map<String, dynamic>;
 
       var fetchedIntervals = EnphaseIntervals.fromData(jsonResponse);
-      dataStore.storeManyIntervals(fetchedIntervals.splitIntoDays());
-      return fetchedIntervals;
+      var intervalsMap = fetchedIntervals.splitIntoDays();
+      dataStore.storeManyIntervals(intervalsMap);
+      return intervalsMap;
     } else {
       print('Request failed with status: ${response.statusCode}.');
       return Future.error('Failed to get token');
