@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:smart_texas_solar/models/enphase_system.dart';
 import 'package:smart_texas_solar/providers/enphase/token_service_provider.dart';
 import 'dart:convert' as convert;
 
@@ -30,11 +31,11 @@ class EnphaseApiService {
     return component;
   }
 
-  Future<String> _fetchSystemId(BuildContext context) async {
+  Future<EnphaseSystem> _fetchSystemInfo(BuildContext context) async {
     var dataStore = await _futureDataStore;
-    String? systemId = dataStore.getSystemId();
-    if (systemId != null) {
-      return systemId;
+    EnphaseSystem? systemInfo = dataStore.getSystemInfo();
+    if (systemInfo != null) {
+      return systemInfo;
     }
 
     var url = Uri.https('api.enphaseenergy.com', '/api/v4/systems',
@@ -47,13 +48,19 @@ class EnphaseApiService {
       var jsonResponse =
           convert.jsonDecode(response.body) as Map<String, dynamic>;
 
-      String systemId = jsonResponse['systems'][0]['system_id'].toString();
-      dataStore.storeSystemId(systemId);
-      return systemId;
+      // support multiple system setups
+      systemInfo = EnphaseSystem.fromData(jsonResponse['systems'][0]);
+      dataStore.storeSystemInfo(systemInfo);
+      return systemInfo;
     } else {
       print('Request failed with status: ${response.statusCode}.');
       return Future.error('Failed to get enphase systems');
     }
+  }
+
+  Future<String> _fetchSystemId(BuildContext context) async {
+    var systemInfo = await _fetchSystemInfo(context);
+    return systemInfo.systemId;
   }
 
   Future<Map<DateTime, EnphaseIntervals>> fetchIntervals({

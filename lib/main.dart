@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
+import 'package:smart_texas_solar/models/enphase_system.dart';
 import 'package:smart_texas_solar/widgets/number_card.dart';
 
 import 'models/combined_interval.dart';
@@ -27,6 +28,7 @@ void main() async {
   Hive.registerAdapter(IntervalAdapter());
   Hive.registerAdapter(SMTIntervalsAdapter());
   Hive.registerAdapter(EnphaseIntervalsAdapter());
+  Hive.registerAdapter(EnphaseSystemAdapter());
   runApp(const ProviderScope(child: MyApp()));
 }
 

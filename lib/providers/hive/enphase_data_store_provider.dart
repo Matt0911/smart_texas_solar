@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:smart_texas_solar/models/enphase_system.dart';
 
 import '../../models/enphase_intervals.dart';
 
@@ -9,9 +10,10 @@ final enphaseDataStoreProvider =
 const String coreBoxName = 'enphaseData';
 const String intervalsBoxName = 'enphaseIntervals';
 const String systemIdKey = 'sysid';
+const String systemInfoKey = 'sysinfo';
 
 class EnphaseDataStore {
-  late Box<String> _coreBox;
+  late Box _coreBox;
   late Box<EnphaseIntervals> _intervalsBox;
 
   EnphaseDataStore._create();
@@ -23,7 +25,7 @@ class EnphaseDataStore {
   }
 
   _init() async {
-    _coreBox = await Hive.openBox<String>(coreBoxName);
+    _coreBox = await Hive.openBox(coreBoxName);
     _intervalsBox = await Hive.openBox<EnphaseIntervals>(intervalsBoxName);
     // resetIntervalsStore();
   }
@@ -58,8 +60,8 @@ class EnphaseDataStore {
     _intervalsBox.deleteAll(_intervalsBox.keys);
   }
 
-  String? getSystemId() => _coreBox.get(systemIdKey);
-  storeSystemId(String systemId) {
-    _coreBox.put(systemIdKey, systemId);
+  EnphaseSystem? getSystemInfo() => _coreBox.get(systemInfoKey);
+  storeSystemInfo(EnphaseSystem systemInfo) {
+    _coreBox.put(systemInfoKey, systemInfo);
   }
 }
