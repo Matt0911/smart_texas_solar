@@ -31,6 +31,8 @@ class EnphaseApiService {
     return component;
   }
 
+  // TODO: "queueing" system to help avoid the 10 requests per min limit
+
   Future<EnphaseSystem> _fetchSystemInfo(BuildContext context) async {
     var dataStore = await _futureDataStore;
     EnphaseSystem? systemInfo = dataStore.getSystemInfo();

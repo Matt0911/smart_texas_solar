@@ -1,11 +1,13 @@
 class CombinedInterval {
   DateTime endTime;
+  DateTime startTime;
   num kwhGridConsumption;
   num kwhSurplusGeneration;
   num kwhSolarProduction;
 
   CombinedInterval({
     required this.endTime,
+    required this.startTime,
     required this.kwhGridConsumption,
     required this.kwhSurplusGeneration,
     required this.kwhSolarProduction,

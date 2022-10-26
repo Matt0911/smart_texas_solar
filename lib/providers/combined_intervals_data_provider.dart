@@ -18,23 +18,69 @@ final combinedIntervalsDataProvider = FutureProvider.autoDispose
       smtData: smtIntervals, enpahseData: enphaseIntervals);
 });
 
+int _getNumberOfIntervalsToCombine(int numDaysToDisplay) {
+  if (numDaysToDisplay <= 1) {
+    return 1; // 15 min data
+  }
+  if (numDaysToDisplay <= 2) {
+    return 2; // 30 min
+  }
+  if (numDaysToDisplay <= 4) {
+    return 4; // hourly
+  }
+  if (numDaysToDisplay <= 7) {
+    return 12; // 3 hours
+  }
+  return 96; // daily data
+}
+
 Map<DateTime, List<CombinedInterval>> _combineEnphaseAndSMTData(
   Map<DateTime, EnphaseIntervals> enpahseData,
   Map<DateTime, SMTIntervals> smtData,
 ) {
+  assert(enpahseData.length == smtData.length);
   Map<DateTime, List<CombinedInterval>> data = {};
-  for (var d in enpahseData.keys) {
-    data[d] = <CombinedInterval>[];
-    var enphase = enpahseData[d]!.generationMap;
-    var smtConsumption = smtData[d]!.consumptionMap;
-    var smtSurplus = smtData[d]!.surplusMap;
-    for (var it in IntervalTime.values) {
-      data[d]!.add(
+  int sliceSize = _getNumberOfIntervalsToCombine(enpahseData.length);
+  for (var day in enpahseData.keys) {
+    data[day] = <CombinedInterval>[];
+    var enphase = enpahseData[day]!.generationMap;
+    var smtConsumption = smtData[day]!.consumptionMap;
+    var smtSurplus = smtData[day]!.surplusMap;
+
+    for (int i = 0; i < IntervalTime.values.length; i += sliceSize) {
+      var itSublist = IntervalTime.values.sublist(i, i + sliceSize);
+      data[day]!.add(
+        // TODO: handle combining days together
         CombinedInterval(
-          endTime: enphase.getInterval(it)!.endTime, // TODO: nulls?
-          kwhGridConsumption: smtConsumption.getInterval(it)!.kwh,
-          kwhSurplusGeneration: smtSurplus.getInterval(it)!.kwh,
-          kwhSolarProduction: enphase.getInterval(it)!.kwh,
+          endTime: enphase.getInterval(itSublist.last)!.endTime,
+          startTime: enphase
+              .getInterval(itSublist.first)!
+              .endTime
+              .subtract(const Duration(minutes: 15)),
+          kwhGridConsumption: itSublist
+              .map(
+                (it) => smtConsumption.getInterval(it)!.kwh,
+              )
+              .fold<num>(
+                0,
+                (prev, element) => prev + element,
+              ),
+          kwhSurplusGeneration: itSublist
+              .map(
+                (it) => smtSurplus.getInterval(it)!.kwh,
+              )
+              .fold<num>(
+                0,
+                (prev, element) => prev + element,
+              ),
+          kwhSolarProduction: itSublist
+              .map(
+                (it) => enphase.getInterval(it)!.kwh,
+              )
+              .fold<num>(
+                0,
+                (prev, element) => prev + element,
+              ),
         ),
       );
     }
