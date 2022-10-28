@@ -83,7 +83,7 @@ class _IntervalsChartState extends State<IntervalsChart> {
   Widget build(BuildContext context) {
     return SfCartesianChart(
       primaryXAxis: DateTimeAxis(),
-      primaryYAxis: NumericAxis(),
+      primaryYAxis: NumericAxis(labelFormat: '{value} kWh'),
       tooltipBehavior: _tooltipBehavior,
       series: <ChartSeries>[
         AreaSeries<CombinedInterval, DateTime>(
@@ -117,7 +117,7 @@ TableRow _getTooltipRow({required String text, required num value}) => TableRow(
         Container(
           alignment: Alignment.centerRight,
           child: Text(
-            value.toStringAsFixed(3),
+            '${value.toStringAsFixed(3)} kWh',
             style: kTooltipTextStyle,
           ),
         ),
