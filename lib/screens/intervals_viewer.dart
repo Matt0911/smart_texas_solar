@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
 
-import '../models/combined_interval.dart';
 import '../providers/combined_intervals_data_provider.dart';
 import '../providers/selected_dates_provider.dart';
-import '../widgets/line_bar_combo_chart.dart';
+import '../widgets/intervals_chart.dart';
 import '../widgets/number_card.dart';
 
 final _formatter = DateFormat('MMM dd, yyyy');
@@ -124,51 +122,10 @@ class IntervalsViewer extends ConsumerWidget {
                       ],
                     ),
                     Expanded(
-                      flex: 3,
-                      child: LineBarComboChart(
-                        // TODO: charts_flutter is discontinued, implement alternative
-                        [
-                          charts.Series<CombinedInterval, DateTime>(
-                            id: 'Consumption',
-                            colorFn: (_, __) =>
-                                const charts.Color(r: 214, g: 144, b: 2),
-                            domainFn: (interval, _) => interval.endTime,
-                            measureFn: (interval, _) =>
-                                -interval.kwhTotalConsumption,
-                            data: combinedIntervals.intervalsList,
-                          )..setAttribute(charts.rendererIdKey, 'customBar'),
-                          charts.Series<CombinedInterval, DateTime>(
-                            id: 'Production',
-                            colorFn: (_, __) =>
-                                charts.MaterialPalette.green.shadeDefault,
-                            domainFn: (interval, _) => interval.endTime,
-                            measureFn: (interval, _) =>
-                                interval.kwhSolarProduction,
-                            data: combinedIntervals.intervalsList,
-                          )..setAttribute(charts.rendererIdKey, 'customBar'),
-                          charts.Series<CombinedInterval, DateTime>(
-                            id: 'Net',
-                            areaColorFn: (interval, __) =>
-                                interval.kwhTotalConsumption -
-                                            interval.kwhSolarProduction >
-                                        0
-                                    ? charts.MaterialPalette.red.shadeDefault
-                                    : charts.MaterialPalette.green.shadeDefault,
-                            colorFn: (interval, __) =>
-                                interval.kwhTotalConsumption -
-                                            interval.kwhSolarProduction >
-                                        0
-                                    ? charts.MaterialPalette.red.shadeDefault
-                                    : const charts.Color(r: 24, g: 237, b: 7),
-                            domainFn: (interval, _) => interval.endTime,
-                            measureFn: (interval, _) =>
-                                interval.kwhSolarProduction -
-                                interval.kwhTotalConsumption,
-                            data: combinedIntervals.intervalsList,
-                          ),
-                        ],
-                      ),
-                    )
+                        flex: 3,
+                        child: IntervalsChart(
+                          intervalsData: combinedIntervals.intervalsList,
+                        ))
                   ],
                 ),
               );
