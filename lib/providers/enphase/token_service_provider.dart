@@ -11,7 +11,7 @@ import 'package:smart_texas_solar/providers/hive/secrets_provider.dart';
 import 'package:smart_texas_solar/widgets/enphase_auth_code_webview.dart';
 
 final enphaseTokenServiceProvider =
-    Provider.autoDispose<EnphaseTokenService>((ref) {
+    FutureProvider.autoDispose<EnphaseTokenService>((ref) {
   var secretsDB = ref.watch(secretsProvider.future);
   var refreshTokenProvider = ref.watch(enphaseRefreshTokenProvider.future);
   return EnphaseTokenService(secretsDB, refreshTokenProvider);

@@ -48,6 +48,7 @@ class EnpahseTokenStore {
   _init() async {
     // TODO: use encrypted box
     _tokensBox = await Hive.openBox<EnphaseTokenResponse>(boxName);
+    // _tokensBox.clear();
   }
 
   storeTokens(EnphaseTokenResponse tokens) {

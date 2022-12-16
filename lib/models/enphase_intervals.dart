@@ -37,7 +37,13 @@ class EnphaseIntervals {
     generationMap.addInterval(interval);
   }
 
-  Map<DateTime, EnphaseIntervals> splitIntoDays() {
+  static Map<DateTime, EnphaseIntervals> splitIntoDays(
+      Map<String, dynamic> enphaseIntervalResponse) {
+    var generationData = (enphaseIntervalResponse['intervals'] as List)
+        .map((d) => Interval(
+            endTime: DateTime.fromMillisecondsSinceEpoch(d['end_at'] * 1000),
+            kwh: d['wh_del'] / 1000))
+        .toList();
     Map<DateTime, EnphaseIntervals> data = {};
     for (var interval in generationData) {
       var intervalDay = interval.endTime.subtract(const Duration(minutes: 1));

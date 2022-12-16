@@ -64,7 +64,25 @@ class SMTIntervals {
     surplusMap.addInterval(interval);
   }
 
-  Map<DateTime, SMTIntervals> splitIntoDays() {
+  static Map<DateTime, SMTIntervals> splitIntoDays(
+      Map<String, dynamic> smtIntervalResponse) {
+    var consumptionData = (smtIntervalResponse['intervaldata'] as List)
+        .map((d) => Interval(
+            endTime: _formatter
+                .parse(
+                    '${d['date']} ${d['starttime'].toString().trimLeft().toUpperCase()}')
+                .add(const Duration(minutes: 15)),
+            kwh: d['consumption']))
+        .toList();
+    var surplusData = (smtIntervalResponse['intervaldata'] as List)
+        .map((d) => Interval(
+            endTime: _formatter
+                .parse(
+                    '${d['date']} ${d['starttime'].toString().trimLeft().toUpperCase()}')
+                .add(const Duration(minutes: 15)),
+            kwh: d['generation']))
+        .toList();
+
     Map<DateTime, SMTIntervals> data = {};
     for (var i = 0; i < consumptionData.length; i++) {
       var consumptionInterval = consumptionData[i];

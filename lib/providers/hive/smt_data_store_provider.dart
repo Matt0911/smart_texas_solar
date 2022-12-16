@@ -1,15 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../../models/smt_intervals.dart';
 
 final smtDataStoreProvider =
     FutureProvider<SMTDataStore>((_) => SMTDataStore.create());
 
-const String boxName = 'smtIntervals';
+const String coreBoxName = 'smtCore';
+const String intervalsBoxName = 'smtIntervals';
+
+const String accessTokenKey = 'accessToken';
+const String cookiesKey = 'cookies';
 
 class SMTDataStore {
-  // late Box<String> _coreBox; TODO: storing esiid or stuff
+  late Box<String> _coreBox; // TODO: storing esiid or stuff
   late Box<SMTIntervals> _intervalsBox;
 
   SMTDataStore._create();
@@ -21,7 +26,8 @@ class SMTDataStore {
   }
 
   _init() async {
-    _intervalsBox = await Hive.openBox<SMTIntervals>(boxName);
+    _coreBox = await Hive.openBox<String>(coreBoxName);
+    _intervalsBox = await Hive.openBox<SMTIntervals>(intervalsBoxName);
     // resetIntervalsStore();
   }
 
@@ -52,6 +58,28 @@ class SMTDataStore {
   }
 
   resetIntervalsStore() {
-    _intervalsBox.deleteAll(_intervalsBox.keys);
+    _intervalsBox.clear();
+  }
+
+  String? getAccessToken() {
+    String? storedToken = _coreBox.get(accessTokenKey);
+    if (storedToken == null || JwtDecoder.isExpired(storedToken)) return null;
+    return storedToken;
+  }
+
+  setAccessToken(String token) {
+    _coreBox.put(accessTokenKey, token);
+  }
+
+  String? getCookies() {
+    return _coreBox.get(cookiesKey);
+  }
+
+  setCookies(String cookies) {
+    _coreBox.put(cookiesKey, cookies);
+  }
+
+  removeCookies() {
+    _coreBox.delete(cookiesKey);
   }
 }

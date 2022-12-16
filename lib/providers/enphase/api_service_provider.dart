@@ -11,21 +11,21 @@ import 'package:smart_texas_solar/util/date_util.dart';
 import '../../models/enphase_intervals.dart';
 
 final enphaseApiServiceProvider =
-    Provider.autoDispose<EnphaseApiService>((ref) {
-  var tokenService = ref.watch(enphaseTokenServiceProvider);
-  var enphaseDataStore = ref.watch(enphaseDataStoreProvider.future);
-  return EnphaseApiService(tokenService, enphaseDataStore);
+    FutureProvider.autoDispose<EnphaseApiService>((ref) async {
+  var tokenService = await ref.watch(enphaseTokenServiceProvider.future);
+  var enphaseDataStore = await ref.watch(enphaseDataStoreProvider.future);
+  return EnphaseApiService.create(tokenService, enphaseDataStore);
 });
 
 class EnphaseApiService {
   final EnphaseTokenService _tokenService;
-  final Future<EnphaseDataStore> _futureDataStore;
-  EnphaseApiService._create(this._tokenService, this._futureDataStore);
+  final EnphaseDataStore _dataStore;
+  EnphaseApiService._create(this._tokenService, this._dataStore);
 
-  EnphaseApiService(this._tokenService, this._futureDataStore);
+  EnphaseApiService(this._tokenService, this._dataStore);
 
-  static Future<EnphaseApiService> create(EnphaseTokenService tokenController,
-      Future<EnphaseDataStore> dataStore) async {
+  static Future<EnphaseApiService> create(
+      EnphaseTokenService tokenController, EnphaseDataStore dataStore) async {
     final component = EnphaseApiService._create(tokenController, dataStore);
     // await component.fetchInterval();
     return component;
@@ -34,8 +34,7 @@ class EnphaseApiService {
   // TODO: "queueing" system to help avoid the 10 requests per min limit
 
   Future<EnphaseSystem> _fetchSystemInfo(BuildContext context) async {
-    var dataStore = await _futureDataStore;
-    EnphaseSystem? systemInfo = dataStore.getSystemInfo();
+    EnphaseSystem? systemInfo = _dataStore.getSystemInfo();
     if (systemInfo != null) {
       return systemInfo;
     }
@@ -52,7 +51,7 @@ class EnphaseApiService {
 
       // support multiple system setups
       systemInfo = EnphaseSystem.fromData(jsonResponse['systems'][0]);
-      dataStore.storeSystemInfo(systemInfo);
+      _dataStore.storeSystemInfo(systemInfo);
       return systemInfo;
     } else {
       print('Request failed with status: ${response.statusCode}.');
@@ -74,8 +73,7 @@ class EnphaseApiService {
 
     var dates = getDateListFromRange(startDate, endDate ?? startDate);
 
-    var dataStore = await _futureDataStore;
-    var intervalsData = dataStore.getStoredIntervals(dates);
+    var intervalsData = _dataStore.getStoredIntervals(dates);
     if (intervalsData != null) {
       return intervalsData;
     }
@@ -97,10 +95,8 @@ class EnphaseApiService {
     if (response.statusCode == 200) {
       var jsonResponse =
           convert.jsonDecode(response.body) as Map<String, dynamic>;
-
-      var fetchedIntervals = EnphaseIntervals.fromData(jsonResponse);
-      var intervalsMap = fetchedIntervals.splitIntoDays();
-      dataStore.storeManyIntervals(intervalsMap);
+      var intervalsMap = EnphaseIntervals.splitIntoDays(jsonResponse);
+      _dataStore.storeManyIntervals(intervalsMap);
       return intervalsMap;
     } else {
       print('Request failed with status: ${response.statusCode}.');

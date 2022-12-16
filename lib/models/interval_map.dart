@@ -9,7 +9,26 @@ Map<IntervalTime, Interval> _convertListToMap(List<Interval> intervalList) {
   for (var interval in intervalList) {
     var key = IntervalTime.values.byName(intervalTimeFormat
         .format(interval.endTime.subtract(const Duration(minutes: 15))));
-    map[key] = interval;
+    if (map[key] != null) {
+      map[key]!.combine(interval);
+    } else {
+      map[key] = interval;
+    }
+  }
+  for (var key in IntervalTime.values) {
+    if (map[key] == null) {
+      var missingDate = intervalList.first.endTime;
+      var missingHours = int.tryParse(key.name.substring(1, 3));
+      var missingMins = int.tryParse(key.name.substring(3));
+      var missingIntervalEndTime = DateTime(
+        missingDate.year,
+        missingDate.month,
+        missingDate.day,
+        missingHours!,
+        missingMins!,
+      ).add(const Duration(minutes: 15));
+      map[key] = Interval(endTime: missingIntervalEndTime, kwh: 0);
+    }
   }
   return map;
 }

@@ -57,7 +57,7 @@ class EnphaseDataStore {
   }
 
   resetIntervalsStore() {
-    _intervalsBox.deleteAll(_intervalsBox.keys);
+    _intervalsBox.clear();
   }
 
   EnphaseSystem? getSystemInfo() => _coreBox.get(systemInfoKey);

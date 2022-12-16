@@ -11,6 +11,10 @@ class Interval {
 
   Interval({required this.endTime, required this.kwh});
 
+  void combine(Interval other) {
+    kwh += other.kwh;
+  }
+
   @override
   String toString() {
     return '$endTime - khw: $kwh';
