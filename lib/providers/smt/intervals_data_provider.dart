@@ -6,11 +6,10 @@ import '../../models/smt_intervals.dart';
 
 final smtIntervalsDataProvider =
     FutureProvider<Map<DateTime, SMTIntervals>>((ref) async {
-  IntervalsService intervalsService =
-      await ref.watch(smtApiServiceProvider.future);
+  SMTApiService apiService = await ref.watch(smtApiServiceProvider.future);
   SelectedDates selectedDates = ref.watch(selectedDatesProvider);
 
-  return await intervalsService.fetchIntervals(
+  return await apiService.fetchIntervals(
     startDate: selectedDates.startDate,
     endDate: selectedDates.endDate,
   );

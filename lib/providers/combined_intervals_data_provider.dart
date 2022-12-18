@@ -8,11 +8,10 @@ import 'package:smart_texas_solar/providers/smt/intervals_data_provider.dart';
 import '../models/enphase_intervals.dart';
 import '../models/smt_intervals.dart';
 
-final combinedIntervalsDataProvider = FutureProvider.autoDispose
-    .family<CombinedIntervalsData, BuildContext>((ref, context) async {
+final combinedIntervalsDataProvider =
+    FutureProvider.autoDispose<CombinedIntervalsData>((ref) async {
   var smtIntervals = await ref.watch(smtIntervalsDataProvider.future);
-  var enphaseIntervals =
-      await ref.watch(enphaseIntervalsDataProvider(context).future);
+  var enphaseIntervals = await ref.watch(enphaseIntervalsDataProvider.future);
 
   return CombinedIntervalsData(
       smtData: smtIntervals, enpahseData: enphaseIntervals);

@@ -8,35 +8,39 @@ import '../../models/smt_intervals.dart';
 import '../../util/date_util.dart';
 import '../hive/smt_data_store_provider.dart';
 
-final smtApiServiceProvider = FutureProvider<IntervalsService>((ref) async {
+final smtApiServiceProvider = FutureProvider<SMTApiService>((ref) async {
   SMTDataStore dataStore = await ref.watch(smtDataStoreProvider.future);
   TokenService tokenController =
       await ref.watch(smtTokenServiceProvider.future);
-  return IntervalsService.create(tokenController, dataStore);
+  return SMTApiService.create(tokenController, dataStore);
 });
 
-class IntervalsService {
+class SMTApiService {
   final TokenService _tokenController;
   final SMTDataStore _dataStore;
-  IntervalsService._create(this._tokenController, this._dataStore);
+  SMTApiService._create(this._tokenController, this._dataStore);
 
-  static Future<IntervalsService> create(
+  static Future<SMTApiService> create(
     TokenService tokenController,
     SMTDataStore intervalsStore,
   ) async {
-    final component = IntervalsService._create(tokenController, intervalsStore);
+    final component = SMTApiService._create(tokenController, intervalsStore);
     return component;
   }
 
   final DateFormat _formatter = DateFormat('MM/dd/yyyy');
 
+  Map<DateTime, SMTIntervals>? getIntervalsSavedForDates(
+      DateTime startDate, DateTime? endDate) {
+    var dates = getDateListFromRange(startDate, endDate ?? startDate);
+    return _dataStore.getStoredIntervals(dates);
+  }
+
   Future<Map<DateTime, SMTIntervals>> fetchIntervals({
     required DateTime startDate,
     DateTime? endDate,
   }) async {
-    var dates = getDateListFromRange(startDate, endDate ?? startDate);
-
-    var intervalsData = _dataStore.getStoredIntervals(dates);
+    var intervalsData = getIntervalsSavedForDates(startDate, endDate);
     if (intervalsData != null) {
       return intervalsData;
     }

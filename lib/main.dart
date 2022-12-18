@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:smart_texas_solar/models/enphase_system.dart';
 import 'package:smart_texas_solar/screens/intervals_viewer.dart';
+import 'package:smart_texas_solar/util/navigator_key.dart';
 
 import 'models/enphase_intervals.dart';
 import 'models/interval.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
       ),
       home: const HomePage(),
+      navigatorKey: navigatorKey,
     );
   }
 }

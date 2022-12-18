@@ -31,9 +31,7 @@ class EnphaseApiService {
     return component;
   }
 
-  // TODO: "queueing" system to help avoid the 10 requests per min limit
-
-  Future<EnphaseSystem> _fetchSystemInfo(BuildContext context) async {
+  Future<EnphaseSystem> _fetchSystemInfo() async {
     EnphaseSystem? systemInfo = _dataStore.getSystemInfo();
     if (systemInfo != null) {
       return systemInfo;
@@ -41,7 +39,7 @@ class EnphaseApiService {
 
     var url = Uri.https('api.enphaseenergy.com', '/api/v4/systems',
         (await _tokenService.apiKeyQuery));
-    String token = await _tokenService.getAccessToken(context);
+    String token = await _tokenService.getAccessToken();
     var response = await http.get(url, headers: {
       'Authorization': 'Bearer $token',
     });
@@ -55,30 +53,37 @@ class EnphaseApiService {
       return systemInfo;
     } else {
       print('Request failed with status: ${response.statusCode}.');
-      return Future.error('Failed to get enphase systems');
+      return Future.error('Failed to get enphase system info');
     }
   }
 
-  Future<String> _fetchSystemId(BuildContext context) async {
-    var systemInfo = await _fetchSystemInfo(context);
+  Future<String> _fetchSystemId() async {
+    var systemInfo = await _fetchSystemInfo();
     return systemInfo.systemId;
   }
 
+  Future<DateTime> getSystemStartDate() async {
+    return (await _fetchSystemInfo()).operationalAtTime;
+  }
+
+  Map<DateTime, EnphaseIntervals>? getIntervalsSavedForDates(
+      DateTime startDate, DateTime? endDate) {
+    var dates = getDateListFromRange(startDate, endDate ?? startDate);
+    return _dataStore.getStoredIntervals(dates);
+  }
+
   Future<Map<DateTime, EnphaseIntervals>> fetchIntervals({
-    required BuildContext context,
     required DateTime startDate,
     DateTime? endDate,
   }) async {
-    String systemId = await _fetchSystemId(context);
+    String systemId = await _fetchSystemId();
 
-    var dates = getDateListFromRange(startDate, endDate ?? startDate);
-
-    var intervalsData = _dataStore.getStoredIntervals(dates);
+    var intervalsData = getIntervalsSavedForDates(startDate, endDate);
     if (intervalsData != null) {
       return intervalsData;
     }
 
-    String token = await _tokenService.getAccessToken(context);
+    String token = await _tokenService.getAccessToken();
     DateTime startDateStartOfDay =
         DateTime(startDate.year, startDate.month, startDate.day);
     DateTime realEndDate = endDate ?? startDate.add(const Duration(days: 1));

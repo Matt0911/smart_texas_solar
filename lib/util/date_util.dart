@@ -5,3 +5,21 @@ List<DateTime> getDateListFromRange(DateTime start, DateTime end) {
   return List.generate(daysToGenerate,
       (i) => DateTime(start.year, start.month, start.day + (i)));
 }
+
+DateTime getStartOfDay(DateTime date) =>
+    DateTime(date.year, date.month, date.day, 0, 0, 0);
+
+DateTime getEndOfDay(DateTime date) =>
+    DateTime(date.year, date.month, date.day, 23, 59, 59);
+
+DateTime getDateFromToday(int deltaDays, bool endOfDay) {
+  var now = DateTime.now();
+  return DateTime(
+    now.year,
+    now.month,
+    now.day + deltaDays,
+    endOfDay ? 23 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 59 : 0,
+  );
+}

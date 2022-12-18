@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_texas_solar/providers/past_intervals_data_fetcher_provider.dart';
 
 import '../providers/combined_intervals_data_provider.dart';
 import '../providers/selected_dates_provider.dart';
@@ -15,13 +16,30 @@ String getSelectedDateText(DateTime start, DateTime end) {
   return '$startStr - $endStr';
 }
 
+// TODO: stateful
 class IntervalsViewer extends ConsumerWidget {
   const IntervalsViewer({Key? key}) : super(key: key);
 
   @override
   Widget build(context, ref) {
     var selectedDates = ref.watch(selectedDatesProvider);
-    var intervals = ref.watch(combinedIntervalsDataProvider(context));
+    var intervals = ref.watch(combinedIntervalsDataProvider);
+    ref.listen<bool>(pastIntervalsDataFetcherProvider, ((previous, next) {
+      print('fetching past data? $next, $previous');
+      if (next) {
+        ScaffoldMessenger.of(context).showMaterialBanner(
+          const MaterialBanner(
+            content: Text('Fetching historical data...'),
+            backgroundColor: Colors.green,
+            actions: <Widget>[
+              SizedBox(height: 0),
+            ],
+          ),
+        );
+      } else if (previous != null && previous) {
+        ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+      }
+    }));
     return Scaffold(
         appBar: AppBar(
           title: const Text('Smart Texas Solar'),
