@@ -23,12 +23,11 @@ class PastIntervalsFetcher extends StateNotifier<bool> {
   void _fetchPastIntervals() async {
     EnphaseApiService enphaseApiService = await enphaseApiServiceFuture;
     SMTApiService smtApiService = await smtApiServiceFuture;
-    DateTime currentEndDate = getDateFromToday(-2, true);
+    DateTime currentEndDate = getDateFromToday(-3, true);
     DateTime twoYearsAgo = getDateFromToday(365 * -2, true);
     DateTime solarStartDate = await enphaseApiService.getSystemStartDate();
 
-    while (!(currentEndDate.isBefore(solarStartDate) ||
-        currentEndDate.isBefore(twoYearsAgo))) {
+    while (!(currentEndDate.isBefore(solarStartDate) || currentEndDate.isBefore(twoYearsAgo))) {
       DateTime sixDaysBefore = currentEndDate.subtract(const Duration(days: 6));
       DateTime fetchStartDate = sixDaysBefore;
       bool beforeSolarStart = sixDaysBefore.isBefore(solarStartDate);
@@ -69,13 +68,13 @@ class PastIntervalsFetcher extends StateNotifier<bool> {
           endDate: currentEndDate,
         );
       }
-      if (needsToFetchEnphase || needsToFetchSMT) {
+
+      currentEndDate = currentEndDate.subtract(const Duration(days: 7));
+      if(!(currentEndDate.isBefore(solarStartDate) || currentEndDate.isBefore(twoYearsAgo))) {
         // Enphase has strict 10 api calls/min limit, do 6/min here to allow for
         //   normal user interaction too
         await Future.delayed(const Duration(seconds: 10));
       }
-
-      currentEndDate = currentEndDate.subtract(const Duration(days: 7));
     }
 
     // done fetching history
