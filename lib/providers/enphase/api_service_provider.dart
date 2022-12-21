@@ -105,7 +105,7 @@ class EnphaseApiService {
       return intervalsMap;
     } else {
       print('Request failed with status: ${response.statusCode}.');
-      return Future.error('Failed to get token');
+      return Future.error('Failed to get enphase intervals');
     }
   }
 }

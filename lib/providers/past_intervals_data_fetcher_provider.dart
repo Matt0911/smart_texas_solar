@@ -27,8 +27,12 @@ class PastIntervalsFetcher extends StateNotifier<bool> {
     DateTime twoYearsAgo = getDateFromToday(365 * -2, true);
     DateTime solarStartDate = await enphaseApiService.getSystemStartDate();
 
-    while (!(currentEndDate.isBefore(solarStartDate) || currentEndDate.isBefore(twoYearsAgo))) {
-      DateTime sixDaysBefore = currentEndDate.subtract(const Duration(days: 6));
+    while (!(currentEndDate.isBefore(solarStartDate) ||
+        currentEndDate.isBefore(twoYearsAgo))) {
+      DateTime sixDaysBefore = currentEndDate.subtract(const Duration(
+        days: 6,
+        hours: 12,
+      ));
       DateTime fetchStartDate = sixDaysBefore;
       bool beforeSolarStart = sixDaysBefore.isBefore(solarStartDate);
       bool beforeTwoYearsAgo = sixDaysBefore.isBefore(twoYearsAgo);
@@ -53,6 +57,9 @@ class PastIntervalsFetcher extends StateNotifier<bool> {
 
       if (needsToFetchEnphase || needsToFetchSMT) {
         state = true;
+        // Enphase has strict 10 api calls/min limit, do 6/min here to allow for
+        //   normal user interaction too
+        await Future.delayed(const Duration(seconds: 10));
       }
       if (needsToFetchEnphase) {
         print('fetching enphase: $fetchStartDate-$currentEndDate');
@@ -69,12 +76,8 @@ class PastIntervalsFetcher extends StateNotifier<bool> {
         );
       }
 
-      currentEndDate = currentEndDate.subtract(const Duration(days: 7));
-      if(!(currentEndDate.isBefore(solarStartDate) || currentEndDate.isBefore(twoYearsAgo))) {
-        // Enphase has strict 10 api calls/min limit, do 6/min here to allow for
-        //   normal user interaction too
-        await Future.delayed(const Duration(seconds: 10));
-      }
+      currentEndDate = getEndOfDay(
+          currentEndDate.subtract(const Duration(days: 7, hours: 12)));
     }
 
     // done fetching history

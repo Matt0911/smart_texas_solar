@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_texas_solar/models/combined_interval.dart';
 import 'package:smart_texas_solar/models/interval_map.dart';

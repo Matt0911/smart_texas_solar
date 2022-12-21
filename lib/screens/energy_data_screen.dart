@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_texas_solar/providers/past_intervals_data_fetcher_provider.dart';
+import 'package:smart_texas_solar/widgets/sts_drawer.dart';
 
 import '../providers/combined_intervals_data_provider.dart';
 import '../providers/selected_dates_provider.dart';
@@ -16,9 +17,10 @@ String getSelectedDateText(DateTime start, DateTime end) {
   return '$startStr - $endStr';
 }
 
-// TODO: stateful
-class IntervalsViewer extends ConsumerWidget {
-  const IntervalsViewer({Key? key}) : super(key: key);
+class EnergyDataScreen extends ConsumerWidget {
+  static const String routeName = '/energy-data-screen';
+
+  const EnergyDataScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(context, ref) {
@@ -42,8 +44,9 @@ class IntervalsViewer extends ConsumerWidget {
     }));
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Smart Texas Solar'),
+          title: const Text('Energy Data'),
         ),
+        drawer: const STSDrawer(),
         body: Column(children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -94,14 +97,14 @@ class IntervalsViewer extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               NumberCard(
-                                title: 'Production',
-                                value: totalProduction,
+                                title: 'Surplus',
+                                value: totalSurplus,
                                 valueColor: Colors.green.shade500,
                                 valueUnits: 'kWh',
                               ),
                               NumberCard(
-                                title: 'Surplus',
-                                value: totalSurplus,
+                                title: 'Production',
+                                value: totalProduction,
                                 valueColor: Colors.green.shade500,
                                 valueUnits: 'kWh',
                               ),
@@ -113,14 +116,14 @@ class IntervalsViewer extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               NumberCard(
-                                title: 'Consumption',
-                                value: totalConsumption,
+                                title: 'Grid Cons.',
+                                value: totalGrid,
                                 valueColor: Colors.red.shade900,
                                 valueUnits: 'kWh',
                               ),
                               NumberCard(
-                                title: 'Grid Cons.',
-                                value: totalGrid,
+                                title: 'Consumption',
+                                value: totalConsumption,
                                 valueColor: Colors.red.shade900,
                                 valueUnits: 'kWh',
                               ),

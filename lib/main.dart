@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:smart_texas_solar/models/enphase_system.dart';
-import 'package:smart_texas_solar/screens/intervals_viewer.dart';
+import 'package:smart_texas_solar/screens/energy_bill_screen.dart';
+import 'package:smart_texas_solar/screens/energy_data_screen.dart';
 import 'package:smart_texas_solar/util/navigator_key.dart';
 
 import 'models/enphase_intervals.dart';
@@ -39,17 +40,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         brightness: Brightness.dark,
       ),
-      home: const HomePage(),
       navigatorKey: navigatorKey,
+      initialRoute: EnergyDataScreen.routeName,
+      routes: {
+        EnergyDataScreen.routeName: (context) => const EnergyDataScreen(),
+        EnergyBillScreen.routeName: (context) => const EnergyBillScreen(),
+      },
     );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const IntervalsViewer();
   }
 }
