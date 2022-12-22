@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:smart_texas_solar/models/billing_data.dart';
 
 import '../../models/smt_intervals.dart';
 
@@ -9,6 +10,7 @@ final smtDataStoreProvider =
 
 const String coreBoxName = 'smtCore';
 const String intervalsBoxName = 'smtIntervals';
+const String billingBoxName = 'smtBilling';
 
 const String accessTokenKey = 'accessToken';
 const String cookiesKey = 'cookies';
@@ -16,6 +18,7 @@ const String cookiesKey = 'cookies';
 class SMTDataStore {
   late Box<String> _coreBox; // TODO: storing esiid or stuff
   late Box<SMTIntervals> _intervalsBox;
+  late Box<BillingData> _billingDataBox;
 
   SMTDataStore._create();
 
@@ -28,6 +31,8 @@ class SMTDataStore {
   _init() async {
     _coreBox = await Hive.openBox<String>(coreBoxName);
     _intervalsBox = await Hive.openBox<SMTIntervals>(intervalsBoxName);
+    _billingDataBox = await Hive.openBox<BillingData>(billingBoxName);
+    // _billingDataBox.clear();
     // resetIntervalsStore();
   }
 
@@ -59,6 +64,39 @@ class SMTDataStore {
 
   resetIntervalsStore() {
     _intervalsBox.clear();
+  }
+
+  List<BillingData>? getStoredBillingData() {
+    return _billingDataBox.values.toList()
+      ..sort(((a, b) => a.startDate.compareTo(b.startDate)));
+  }
+
+  Future<List<BillingData>> addBillingData(
+      List<BillingData> newBillingData) async {
+    var existingDataKeys = [..._billingDataBox.keys];
+    if (existingDataKeys.isEmpty) {
+      await _billingDataBox.addAll(newBillingData);
+      return getStoredBillingData()!;
+    }
+    for (var bill in newBillingData) {
+      var index = existingDataKeys.indexWhere((existingBillIndex) {
+        var existingBill =
+            _billingDataBox.get(existingDataKeys[existingBillIndex]);
+        return existingBill != null &&
+            existingBill.startDate.isAtSameMomentAs(bill.startDate) &&
+            existingBill.endDate.isAtSameMomentAs(bill.endDate);
+      });
+      if (index == -1) {
+        await _billingDataBox.add(bill);
+      } else {
+        var match = _billingDataBox.get(existingDataKeys[index]);
+        if (bill.lastUpdate.isAfter(match!.lastUpdate)) {
+          await _billingDataBox.put(existingDataKeys[index], bill);
+        }
+      }
+    }
+
+    return getStoredBillingData()!;
   }
 
   String? getAccessToken() {

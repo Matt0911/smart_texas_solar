@@ -23,3 +23,25 @@ DateTime getDateFromToday(int deltaDays, bool endOfDay) {
     endOfDay ? 59 : 0,
   );
 }
+
+DateTime getStartOfNextMonth(DateTime date) {
+  return DateTime(
+    date.year,
+    date.month + 1,
+    1,
+    date.hour,
+    date.minute,
+    date.second,
+  );
+}
+
+DateTime getEndOfMonth(DateTime date) {
+  return DateTime(
+    date.year,
+    date.month + 1,
+    0,
+    date.hour,
+    date.minute,
+    date.second,
+  );
+}

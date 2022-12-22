@@ -62,6 +62,7 @@ class EnergyDataScreen extends ConsumerWidget {
                   onPressed: () async {
                     DateTimeRange? range = await showDateRangePicker(
                         context: context,
+                        // TODO: limit to solar system start date, or make this page work when no solar data
                         firstDate: DateTime(2010),
                         lastDate:
                             DateTime.now().subtract(const Duration(days: 2)),
