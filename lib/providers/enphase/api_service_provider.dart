@@ -78,21 +78,24 @@ class EnphaseApiService {
   }) async {
     String systemId = await _fetchSystemId();
 
+    var intervalsData = getIntervalsSavedForDates(startDate, endDate);
+    if (intervalsData != null) {
+      return intervalsData;
+    }
+
     DateTime systemStartDate = await getSystemStartDate();
     DateTime fetchStart = startDate;
     Map<DateTime, EnphaseIntervals> emptyDays = {};
     if (startDate.isBefore(systemStartDate)) {
       var end = endDate ?? startDate;
       if (end.isBefore(systemStartDate)) {
-        return EnphaseIntervals.getEmptyDays(startDate, end);
+        var intervalsData = EnphaseIntervals.getEmptyDays(startDate, end);
+        _dataStore.storeManyIntervals(intervalsData);
+        return intervalsData;
       }
 
       fetchStart = systemStartDate;
       emptyDays = EnphaseIntervals.getEmptyDays(startDate, systemStartDate);
-    }
-    var intervalsData = getIntervalsSavedForDates(fetchStart, endDate);
-    if (intervalsData != null) {
-      return {...emptyDays, ...intervalsData};
     }
 
     String token = await _tokenService.getAccessToken();
@@ -112,14 +115,15 @@ class EnphaseApiService {
     if (response.statusCode == 200) {
       var jsonResponse =
           convert.jsonDecode(response.body) as Map<String, dynamic>;
-      var intervalsMap = EnphaseIntervals.splitIntoDays(jsonResponse);
-      _dataStore.storeManyIntervals(intervalsMap);
-      return {
+      var intervalsMap = {
         ...emptyDays,
-        ...intervalsMap,
+        ...EnphaseIntervals.splitIntoDays(jsonResponse)
       };
+      _dataStore.storeManyIntervals(intervalsMap);
+      return intervalsMap;
     } else {
-      print('Request failed with status: ${response.statusCode}.');
+      print(
+          'Request failed with status: ${response.statusCode}, ${response.body}');
       return Future.error('Failed to get enphase intervals');
     }
   }

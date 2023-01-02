@@ -25,23 +25,16 @@ class PastIntervalsFetcher extends StateNotifier<bool> {
     SMTApiService smtApiService = await smtApiServiceFuture;
     DateTime currentEndDate = getDateFromToday(-3, true);
     DateTime twoYearsAgo = getDateFromToday(365 * -2, true);
-    DateTime solarStartDate = await enphaseApiService.getSystemStartDate();
 
-    while (!(currentEndDate.isBefore(solarStartDate) ||
-        currentEndDate.isBefore(twoYearsAgo))) {
+    while (!currentEndDate.isBefore(twoYearsAgo)) {
       DateTime sixDaysBefore = currentEndDate.subtract(const Duration(
         days: 6,
         hours: 12,
       ));
       DateTime fetchStartDate = sixDaysBefore;
-      bool beforeSolarStart = sixDaysBefore.isBefore(solarStartDate);
       bool beforeTwoYearsAgo = sixDaysBefore.isBefore(twoYearsAgo);
-      if (beforeSolarStart || beforeTwoYearsAgo) {
-        if (solarStartDate.isAfter(twoYearsAgo)) {
-          fetchStartDate = solarStartDate;
-        } else {
-          fetchStartDate = twoYearsAgo;
-        }
+      if (beforeTwoYearsAgo) {
+        fetchStartDate = twoYearsAgo;
       }
       fetchStartDate = getStartOfDay(fetchStartDate);
       var enphaseSavedData = enphaseApiService.getIntervalsSavedForDates(
