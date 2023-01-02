@@ -78,15 +78,27 @@ class EnphaseApiService {
   }) async {
     String systemId = await _fetchSystemId();
 
-    var intervalsData = getIntervalsSavedForDates(startDate, endDate);
+    DateTime systemStartDate = await getSystemStartDate();
+    DateTime fetchStart = startDate;
+    Map<DateTime, EnphaseIntervals> emptyDays = {};
+    if (startDate.isBefore(systemStartDate)) {
+      var end = endDate ?? startDate;
+      if (end.isBefore(systemStartDate)) {
+        return EnphaseIntervals.getEmptyDays(startDate, end);
+      }
+
+      fetchStart = systemStartDate;
+      emptyDays = EnphaseIntervals.getEmptyDays(startDate, systemStartDate);
+    }
+    var intervalsData = getIntervalsSavedForDates(fetchStart, endDate);
     if (intervalsData != null) {
-      return intervalsData;
+      return {...emptyDays, ...intervalsData};
     }
 
     String token = await _tokenService.getAccessToken();
     DateTime startDateStartOfDay =
-        DateTime(startDate.year, startDate.month, startDate.day);
-    DateTime realEndDate = endDate ?? startDate.add(const Duration(days: 1));
+        DateTime(fetchStart.year, fetchStart.month, fetchStart.day);
+    DateTime realEndDate = endDate ?? fetchStart.add(const Duration(days: 1));
     var url = Uri.https(
         'api.enphaseenergy.com', '/api/v4/systems/$systemId/rgm_stats', {
       ...(await _tokenService.apiKeyQuery),
@@ -102,7 +114,10 @@ class EnphaseApiService {
           convert.jsonDecode(response.body) as Map<String, dynamic>;
       var intervalsMap = EnphaseIntervals.splitIntoDays(jsonResponse);
       _dataStore.storeManyIntervals(intervalsMap);
-      return intervalsMap;
+      return {
+        ...emptyDays,
+        ...intervalsMap,
+      };
     } else {
       print('Request failed with status: ${response.statusCode}.');
       return Future.error('Failed to get enphase intervals');

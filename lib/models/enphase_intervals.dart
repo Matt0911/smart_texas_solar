@@ -1,5 +1,6 @@
 import 'package:hive_flutter/adapters.dart';
 import 'package:smart_texas_solar/models/interval_map.dart';
+import 'package:smart_texas_solar/util/date_util.dart';
 
 import 'interval.dart';
 
@@ -58,6 +59,28 @@ class EnphaseIntervals {
       } else {
         data[startOfDay] = EnphaseIntervals([interval]);
       }
+    }
+
+    return data;
+  }
+
+  static Map<DateTime, EnphaseIntervals> getEmptyDays(
+      DateTime start, DateTime end) {
+    var dates = getDateListFromRange(start, end);
+    Map<DateTime, EnphaseIntervals> data = {};
+    for (var date in dates) {
+      var endOfFirstInterval = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        0,
+        15,
+      );
+
+      // this works beacuse generationMap missing values are filled in during
+      // IntervalMap constructor. We just need the one Interval to know the day
+      var fakeGenerationData = [Interval(endTime: endOfFirstInterval, kwh: 0)];
+      data[date] = EnphaseIntervals(fakeGenerationData);
     }
 
     return data;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_texas_solar/providers/enphase/api_service_provider.dart';
 import 'package:smart_texas_solar/providers/past_intervals_data_fetcher_provider.dart';
 import 'package:smart_texas_solar/widgets/sts_drawer.dart';
 
@@ -27,7 +28,6 @@ class EnergyDataScreen extends ConsumerWidget {
     var selectedDates = ref.watch(selectedDatesProvider);
     var intervals = ref.watch(combinedIntervalsDataProvider);
     ref.listen<bool>(pastIntervalsDataFetcherProvider, ((previous, next) {
-      print('fetching past data? $next, $previous');
       if (next) {
         ScaffoldMessenger.of(context).showMaterialBanner(
           const MaterialBanner(
@@ -61,17 +61,20 @@ class EnergyDataScreen extends ConsumerWidget {
                 ElevatedButton(
                   onPressed: () async {
                     DateTimeRange? range = await showDateRangePicker(
-                        context: context,
-                        // TODO: limit to solar system start date, or make this page work when no solar data
-                        firstDate: DateTime(2010),
-                        lastDate:
-                            DateTime.now().subtract(const Duration(days: 2)),
-                        initialDateRange: DateTimeRange(
-                            start: selectedDates.startDate,
-                            end: selectedDates.endDate));
+                      context: context,
+                      firstDate: DateTime(2010),
+                      lastDate:
+                          DateTime.now().subtract(const Duration(days: 2)),
+                      initialDateRange: DateTimeRange(
+                        start: selectedDates.startDate,
+                        end: selectedDates.endDate,
+                      ),
+                    );
                     if (range != null) {
                       selectedDates.updateDates(
-                          start: range.start, end: range.end);
+                        start: range.start,
+                        end: range.end,
+                      );
                     }
                   },
                   child: const Text('Select Dates'),
