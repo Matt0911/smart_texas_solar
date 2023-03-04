@@ -109,7 +109,7 @@ class SMTApiService {
       url,
       body: {
         'startDate': _formatter.format(startDate),
-        'endDate': _formatter.format(endDate ?? startDate),
+        'endDate': _formatter.format(endDate),
         'esiid': '10443720000461711', // TODO: dynamic
       },
       headers: {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_texas_solar/providers/enphase/api_service_provider.dart';
+import 'package:smart_texas_solar/models/interval_map.dart';
 import 'package:smart_texas_solar/providers/past_intervals_data_fetcher_provider.dart';
 import 'package:smart_texas_solar/widgets/sts_drawer.dart';
 
@@ -25,6 +25,8 @@ class EnergyDataScreen extends ConsumerWidget {
 
   @override
   Widget build(context, ref) {
+    print(IntervalTime.values.map((e) => e.index));
+    print(IntervalTime.values.map((e) => e.name));
     var selectedDates = ref.watch(selectedDatesProvider);
     var intervals = ref.watch(combinedIntervalsDataProvider);
     ref.listen<bool>(pastIntervalsDataFetcherProvider, ((previous, next) {

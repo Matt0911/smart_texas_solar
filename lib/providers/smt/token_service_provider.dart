@@ -52,6 +52,7 @@ class TokenService {
         return null;
       },
       onLoadStop: (controller, url) async {
+        await Future.delayed(const Duration(seconds: 2));
         CookieManager cookieManager = CookieManager.instance();
         var cookies = await cookieManager.getCookies(url: homeUrl);
         if (!getCookies.isCompleted) {
@@ -107,7 +108,8 @@ class TokenService {
       _dataStore.setAccessToken(_token!);
       return _token!;
     } else {
-      return Future.error('Failed to get token');
+      return Future.error(Exception(
+          'Failed to get token\nCode: ${response.statusCode} - ${response.reasonPhrase}'));
     }
   }
 

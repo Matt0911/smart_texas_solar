@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_texas_solar/models/billing_data.dart';
-import 'package:smart_texas_solar/models/smt_intervals.dart';
 import 'package:smart_texas_solar/providers/smt/billing_data_provider.dart';
 import 'package:smart_texas_solar/util/date_util.dart';
 import 'package:smart_texas_solar/widgets/sts_drawer.dart';
 
-import '../models/enphase_intervals.dart';
 import '../providers/enphase/api_service_provider.dart';
 import '../providers/past_intervals_data_fetcher_provider.dart';
 import '../providers/smt/api_service_provider.dart';

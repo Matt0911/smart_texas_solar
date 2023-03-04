@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_texas_solar/screens/energy_bill_screen.dart';
 import 'package:smart_texas_solar/screens/energy_data_screen.dart';
+import 'package:smart_texas_solar/screens/energy_plans_screen.dart';
 
 class STSDrawer extends StatelessWidget {
   const STSDrawer({
@@ -33,6 +34,17 @@ class STSDrawer extends StatelessWidget {
                 : () => Navigator.pushNamed(
                       context,
                       EnergyBillScreen.routeName,
+                    ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.format_list_bulleted),
+            title: const Text('Energy Plans'),
+            selected: EnergyPlansScreen.routeName == currentRoute,
+            onTap: EnergyPlansScreen.routeName == currentRoute
+                ? () => Navigator.pop(context)
+                : () => Navigator.pushNamed(
+                      context,
+                      EnergyPlansScreen.routeName,
                     ),
           ),
         ],

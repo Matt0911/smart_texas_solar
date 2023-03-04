@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:smart_texas_solar/models/billing_data.dart';
+import 'package:smart_texas_solar/models/energy_plan.dart';
 import 'package:smart_texas_solar/models/enphase_system.dart';
 import 'package:smart_texas_solar/screens/energy_bill_screen.dart';
 import 'package:smart_texas_solar/screens/energy_data_screen.dart';
+import 'package:smart_texas_solar/screens/energy_plan_create_screen.dart';
+import 'package:smart_texas_solar/screens/energy_plans_screen.dart';
 import 'package:smart_texas_solar/util/navigator_key.dart';
 
 import 'models/enphase_intervals.dart';
@@ -27,6 +30,7 @@ void main() async {
   Hive.registerAdapter(EnphaseIntervalsAdapter());
   Hive.registerAdapter(EnphaseSystemAdapter());
   Hive.registerAdapter(BillingDataAdapter());
+  Hive.registerAdapter(EnergyPlanAdapter());
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -47,6 +51,9 @@ class MyApp extends StatelessWidget {
       routes: {
         EnergyDataScreen.routeName: (context) => const EnergyDataScreen(),
         EnergyBillScreen.routeName: (context) => const EnergyBillScreen(),
+        EnergyPlansScreen.routeName: (context) => const EnergyPlansScreen(),
+        EnergyPlanCreateScreen.routeName: (context) =>
+            const EnergyPlanCreateScreen(),
       },
     );
   }

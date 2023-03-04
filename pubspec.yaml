@@ -45,6 +45,7 @@ dependencies:
   flutter_launcher_icons: ^0.10.0
   syncfusion_flutter_charts: ^20.3.52
   flutter_inappwebview: ^5.7.1+1
+  math_expressions: ^2.3.1
 
 dev_dependencies:
   flutter_test:
