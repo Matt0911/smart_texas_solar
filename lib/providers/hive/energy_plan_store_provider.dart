@@ -20,7 +20,7 @@ class EnergyPlanStore {
 
   _init() async {
     _box = await Hive.openBox<EnergyPlan>(boxName);
-    // resetIntervalsStore();
+    // _box.clear();
   }
 
   List<EnergyPlan>? getStoredEnergyPlans() {

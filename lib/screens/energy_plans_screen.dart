@@ -99,7 +99,7 @@ class EnergyPlansScreenState extends ConsumerState<EnergyPlansScreen> {
       body: arePlansLoaded && isHistoryLoaded
           ? Column(
               children: [
-                IconButton(
+                TextButton.icon(
                   onPressed: () async {
                     var newPlan = await Navigator.of(context)
                             .pushNamed(EnergyPlanCreateScreen.routeName)
@@ -109,6 +109,7 @@ class EnergyPlansScreenState extends ConsumerState<EnergyPlansScreen> {
                     }
                   },
                   icon: const Icon(Icons.add),
+                  label: const Text('Add Plan'),
                 ),
                 SingleChildScrollView(
                   child: ExpansionPanelList(
@@ -123,14 +124,39 @@ class EnergyPlansScreenState extends ConsumerState<EnergyPlansScreen> {
                             headerBuilder: (context, isExpanded) => ListTile(
                               title: Text(plan.data.name),
                             ),
-                            body: IconButton(
-                              icon: Icon(Icons.delete),
-                              color: Colors.red,
-                              onPressed: () async {
-                                await plan.data.delete();
-                                rawPlansData.remove(plan.data);
-                                setData();
-                              },
+                            body: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit),
+                                      color: Colors.grey,
+                                      onPressed: () async {
+                                        var updatedPlan =
+                                            await Navigator.of(context)
+                                                .pushNamed(
+                                          EnergyPlanCreateScreen.routeName,
+                                          arguments: plan.data,
+                                        ) as EnergyPlan?;
+                                        if (updatedPlan != null) {
+                                          updatedPlan.save();
+                                        }
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete),
+                                      color: Colors.red,
+                                      onPressed: () async {
+                                        await plan.data.delete();
+                                        rawPlansData.remove(plan.data);
+                                        setData();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         )

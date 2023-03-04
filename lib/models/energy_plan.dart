@@ -40,7 +40,10 @@ class EnergyPlan extends HiveObject {
   @HiveField(9)
   String customEquation;
 
-  static Parser p = Parser()
+  @HiveField(10)
+  bool usesCustomEq;
+
+  static Parser getParser() => Parser()
     ..addFunction(
       'if_gt',
       (List<num> args) => args[0] > args[1] ? args[2] : args[3],
@@ -56,8 +59,7 @@ class EnergyPlan extends HiveObject {
     ..addFunction(
       'if_lte',
       (List<num> args) => args[0] <= args[1] ? args[2] : args[3],
-    )
-    ..addFunction('c_between', (List<String> args) => 0);
+    );
   // TODO: figure out how to handle time ranges of consumption
   // field for hive ID?? need to research
 
@@ -70,6 +72,7 @@ class EnergyPlan extends HiveObject {
     this.baseCharge = 0,
     this.solarBuybackRate = 0,
     this.customEquation = '',
+    this.usesCustomEq = false,
     this.name = '',
     List<EnergyPlanCustomVar>? customVars,
   }) : customVars = customVars ?? [];
@@ -80,7 +83,22 @@ class EnergyPlan extends HiveObject {
     required IntervalMap consumptionByTime,
   }) {
     try {
-      p.addFunction('c_between', (List<String> args) {});
+      Parser p = getParser()
+        ..addFunction('c_between', (List<num> args) {
+          String startTime = 't${args[0].toInt().toString().padLeft(4, '0')}';
+          String endTime = 't${args[1].toInt().toString().padLeft(4, '0')}';
+          int startIndex = IntervalTime.values
+              .indexWhere((element) => element.name == startTime);
+          int endIndex = IntervalTime.values
+              .indexWhere((element) => element.name == endTime);
+          var desiredIntervalTimes =
+              IntervalTime.values.sublist(startIndex, endIndex);
+          return desiredIntervalTimes.fold<num>(
+              0,
+              (prev, time) =>
+                  prev += consumptionByTime.intervals[time]?.kwh ?? 0);
+          // TODO: test this
+        });
       Expression exp =
           p.parse(customEquation.isEmpty ? standardEquation : customEquation);
       ContextModel cm = ContextModel()
@@ -103,7 +121,26 @@ class EnergyPlan extends HiveObject {
   }
 
   static void validateCustomEq(
-      String customEq, List<EnergyPlanCustomVar> customVars) {
+    String customEq,
+    List<EnergyPlanCustomVar> customVars,
+  ) {
+    Parser p = getParser()
+      ..addFunction('c_between', (List<num> args) {
+        String startTime = 't${args[0].toInt().toString().padLeft(4, '0')}';
+        String endTime = 't${args[1].toInt().toString().padLeft(4, '0')}';
+        try {
+          IntervalTime.values
+              .firstWhere((element) => element.name == startTime);
+        } catch (e) {
+          throw StateError('Invalid time range start');
+        }
+        try {
+          IntervalTime.values.firstWhere((element) => element.name == endTime);
+        } catch (e) {
+          throw StateError('Invalid time range end');
+        }
+        return 0;
+      });
     Expression exp = p.parse(customEq);
     ContextModel cm = ContextModel()
       ..bindVariable(Variable('cf'), Number(0))

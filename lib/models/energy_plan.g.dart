@@ -25,6 +25,7 @@ class EnergyPlanAdapter extends TypeAdapter<EnergyPlan> {
       baseCharge: fields[5] as num,
       solarBuybackRate: fields[6] as num,
       customEquation: fields[9] as String,
+      usesCustomEq: fields[10] as bool,
       name: fields[8] as String,
       customVars: (fields[7] as List?)?.cast<EnergyPlanCustomVar>(),
     );
@@ -33,7 +34,7 @@ class EnergyPlanAdapter extends TypeAdapter<EnergyPlan> {
   @override
   void write(BinaryWriter writer, EnergyPlan obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.startDate)
       ..writeByte(1)
@@ -53,7 +54,9 @@ class EnergyPlanAdapter extends TypeAdapter<EnergyPlan> {
       ..writeByte(8)
       ..write(obj.name)
       ..writeByte(9)
-      ..write(obj.customEquation);
+      ..write(obj.customEquation)
+      ..writeByte(10)
+      ..write(obj.usesCustomEq);
   }
 
   @override

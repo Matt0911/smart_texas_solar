@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:math_expressions/math_expressions.dart';
 import 'package:smart_texas_solar/models/energy_plan.dart';
 import 'package:smart_texas_solar/models/energy_plan_custom_var.dart';
 import 'package:smart_texas_solar/widgets/sts_drawer.dart';
@@ -66,9 +65,17 @@ void datePickerFormFieldOnTap(
   // Below line stops keyboard from appearing
   FocusScope.of(context).requestFocus(FocusNode());
 
+  DateTime? currentSelectedDate;
+  try {
+    currentSelectedDate = _formatter.parse(ctl.text);
+  } catch (e) {
+    // this should only happen if current text isnt valid date
+  }
+
+  // TODO: allow removing date
   var date = await showDatePicker(
     context: context,
-    initialDate: initialDate,
+    initialDate: currentSelectedDate ?? initialDate,
     firstDate: firstDate,
     lastDate: lastDate,
   );
@@ -80,7 +87,21 @@ void datePickerFormFieldOnTap(
 
 // Create a Form widget.
 class CreateEnergyPlanForm extends StatefulWidget {
-  const CreateEnergyPlanForm({super.key});
+  final EnergyPlan plan;
+  final bool initialUsesCustomEq;
+  final List<EnergyPlanCustomVar> customVars;
+  final TextEditingController startDateCtl;
+  final TextEditingController endDateCtl;
+  CreateEnergyPlanForm({super.key, required this.plan})
+      : customVars = [...plan.customVars],
+        initialUsesCustomEq = plan.usesCustomEq,
+        startDateCtl = TextEditingController(
+          text:
+              plan.startDate == null ? '' : _formatter.format(plan.startDate!),
+        ),
+        endDateCtl = TextEditingController(
+          text: plan.endDate == null ? '' : _formatter.format(plan.endDate!),
+        );
 
   @override
   CreateEnergyPlanFormState createState() {
@@ -92,14 +113,13 @@ class CreateEnergyPlanForm extends StatefulWidget {
 // This class holds data related to the form.
 class CreateEnergyPlanFormState extends State<CreateEnergyPlanForm> {
   final _formKey = GlobalKey<FormState>();
+  late bool usesCustomEq;
 
-  final TextEditingController startDateCtl = TextEditingController();
-  final TextEditingController endDateCtl = TextEditingController();
-
-  final EnergyPlan _plan = EnergyPlan();
-
-  List<EnergyPlanCustomVar> customVars = [];
-  bool usesCustomEq = false;
+  @override
+  void initState() {
+    super.initState();
+    usesCustomEq = widget.initialUsesCustomEq;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,8 +132,9 @@ class CreateEnergyPlanFormState extends State<CreateEnergyPlanForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // TODO add Plan Details header
+              const Heading(text: 'Plan Details'),
               TextFormField(
+                initialValue: widget.plan.name,
                 decoration: const InputDecoration(labelText: 'Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -121,76 +142,85 @@ class CreateEnergyPlanFormState extends State<CreateEnergyPlanForm> {
                   }
                   return null;
                 },
-                onSaved: (val) => setState(() => _plan.name = val!),
+                onSaved: (val) => setState(() => widget.plan.name = val!),
               ),
               TextFormField(
-                controller: startDateCtl,
-                onTap: () => datePickerFormFieldOnTap(context, startDateCtl),
+                controller: widget.startDateCtl,
+                onTap: () =>
+                    datePickerFormFieldOnTap(context, widget.startDateCtl),
                 decoration: const InputDecoration(labelText: 'Start Date'),
                 validator: optionalDateValidator,
-                onSaved: (val) => setState(() => _plan.startDate =
+                onSaved: (val) => setState(() => widget.plan.startDate =
                     val == null || val.isEmpty ? null : _formatter.parse(val)),
               ),
               TextFormField(
-                controller: endDateCtl,
-                onTap: () => datePickerFormFieldOnTap(context, endDateCtl),
+                controller: widget.endDateCtl,
+                onTap: () =>
+                    datePickerFormFieldOnTap(context, widget.endDateCtl),
                 decoration: const InputDecoration(labelText: 'End Date'),
                 validator: optionalDateValidator,
-                onSaved: (val) => setState(() => _plan.endDate =
+                onSaved: (val) => setState(() => widget.plan.endDate =
                     val == null || val.isEmpty ? null : _formatter.parse(val)),
               ),
               TextFormField(
+                initialValue: widget.plan.connectionFee.toString(),
                 decoration:
                     const InputDecoration(labelText: 'Connection Fee (cf)'),
                 validator: requiredNumberValidator,
-                onSaved: (val) =>
-                    setState(() => _plan.connectionFee = double.parse(val!)),
+                onSaved: (val) => setState(
+                    () => widget.plan.connectionFee = double.parse(val!)),
               ),
               TextFormField(
+                initialValue: widget.plan.deliveryCharge.toString(),
                 decoration:
                     const InputDecoration(labelText: 'Delivery Charge (d)'),
                 validator: requiredNumberValidator,
-                onSaved: (val) =>
-                    setState(() => _plan.deliveryCharge = double.parse(val!)),
+                onSaved: (val) => setState(
+                    () => widget.plan.deliveryCharge = double.parse(val!)),
               ),
               TextFormField(
+                initialValue: widget.plan.kwhCharge.toString(),
                 decoration: const InputDecoration(labelText: 'kWh Charge (k)'),
                 validator: requiredNumberValidator,
                 onSaved: (val) =>
-                    setState(() => _plan.kwhCharge = double.parse(val!)),
+                    setState(() => widget.plan.kwhCharge = double.parse(val!)),
               ),
               TextFormField(
+                initialValue: widget.plan.solarBuybackRate == 0
+                    ? null
+                    : widget.plan.solarBuybackRate.toString(),
                 decoration: const InputDecoration(
                     labelText: 'Solar Buyback Rate (sbr)'),
                 validator: optionalNumberValidator,
-                onSaved: (val) => setState(
-                    () => _plan.solarBuybackRate = double.tryParse(val!) ?? 0),
+                onSaved: (val) => setState(() =>
+                    widget.plan.solarBuybackRate = double.tryParse(val!) ?? 0),
               ),
               TextFormField(
+                initialValue: widget.plan.baseCharge == 0
+                    ? null
+                    : widget.plan.baseCharge.toString(),
                 decoration:
                     const InputDecoration(labelText: 'Base Monthly Charge (b)'),
                 validator: optionalNumberValidator,
                 onSaved: (val) => setState(
-                    () => _plan.baseCharge = double.tryParse(val!) ?? 0),
+                    () => widget.plan.baseCharge = double.tryParse(val!) ?? 0),
               ),
-              // TODO: show provided vars c and s and time related?
-              const Padding(
-                padding: EdgeInsets.only(top: 32.0),
-                child: Text(
-                  'Standard Equation: ${EnergyPlan.standardEquation}',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
+              const Heading(text: 'Provided Variables'),
+              const Text('Consumption for Billing Period (c)'),
+              const Text('Solar Surplus for Billing Period (s)'),
+              const Heading(
+                  text: 'Standard Equation: ${EnergyPlan.standardEquation}'),
               CheckboxListTile(
                 title: const Text('Use Custom Equation'),
                 value: usesCustomEq,
                 controlAffinity: ListTileControlAffinity.leading,
-                contentPadding: EdgeInsets.only(top: 16),
+                contentPadding: const EdgeInsets.only(top: 16),
                 onChanged: (newValue) =>
                     setState(() => usesCustomEq = newValue!),
               ),
               usesCustomEq
                   ? TextFormField(
+                      initialValue: widget.plan.customEquation,
                       decoration:
                           const InputDecoration(labelText: 'Custom Equation'),
                       validator: (value) {
@@ -198,7 +228,7 @@ class CreateEnergyPlanFormState extends State<CreateEnergyPlanForm> {
                           return 'Please enter the desired custom equation';
                         }
                         try {
-                          EnergyPlan.validateCustomEq(value, customVars);
+                          EnergyPlan.validateCustomEq(value, widget.customVars);
                         } on StateError catch (e) {
                           return e.message;
                         } catch (e) {
@@ -206,12 +236,11 @@ class CreateEnergyPlanFormState extends State<CreateEnergyPlanForm> {
                         }
                         return null;
                       },
-                      onSaved: (val) =>
-                          setState(() => _plan.customEquation = val ?? ''),
+                      onSaved: (val) => setState(
+                          () => widget.plan.customEquation = val ?? ''),
                     )
                   : const SizedBox(),
-              // TODO add Custom Calculation header
-              ...customVars.map((e) {
+              ...widget.customVars.map((e) {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
@@ -227,6 +256,7 @@ class CreateEnergyPlanFormState extends State<CreateEnergyPlanForm> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               TextFormField(
+                                initialValue: e.name,
                                 decoration:
                                     const InputDecoration(labelText: 'Name'),
                                 validator: (value) {
@@ -239,6 +269,7 @@ class CreateEnergyPlanFormState extends State<CreateEnergyPlanForm> {
                                     setState(() => e.name = val),
                               ),
                               TextFormField(
+                                initialValue: e.value.toString(),
                                 decoration:
                                     const InputDecoration(labelText: 'Value'),
                                 validator: requiredNumberValidator,
@@ -246,6 +277,7 @@ class CreateEnergyPlanFormState extends State<CreateEnergyPlanForm> {
                                     () => e.value = double.tryParse(val) ?? 0),
                               ),
                               TextFormField(
+                                initialValue: e.symbol,
                                 decoration:
                                     const InputDecoration(labelText: 'Symbol'),
                                 validator: (value) {
@@ -265,7 +297,7 @@ class CreateEnergyPlanFormState extends State<CreateEnergyPlanForm> {
                           child: IconButton(
                             onPressed: () {
                               setState(() {
-                                customVars.remove(e);
+                                widget.customVars.remove(e);
                               });
                             },
                             icon: const Icon(
@@ -285,7 +317,7 @@ class CreateEnergyPlanFormState extends State<CreateEnergyPlanForm> {
                 child: TextButton.icon(
                   onPressed: () {
                     setState(() {
-                      customVars.add(EnergyPlanCustomVar());
+                      widget.customVars.add(EnergyPlanCustomVar());
                     });
                   },
                   icon: const Icon(Icons.add),
@@ -301,8 +333,9 @@ class CreateEnergyPlanFormState extends State<CreateEnergyPlanForm> {
                       final form = _formKey.currentState;
                       if (form!.validate()) {
                         form.save();
-                        _plan.customVars = customVars;
-                        Navigator.of(context).pop(_plan);
+                        widget.plan.customVars = widget.customVars;
+                        widget.plan.usesCustomEq = usesCustomEq;
+                        Navigator.of(context).pop(widget.plan);
                       }
                     },
                     child: const Text('Submit'),
@@ -326,6 +359,26 @@ class CreateEnergyPlanFormState extends State<CreateEnergyPlanForm> {
   }
 }
 
+class Heading extends StatelessWidget {
+  final String text;
+
+  const Heading({
+    super.key,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 32.0),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 16),
+      ),
+    );
+  }
+}
+
 class EnergyPlanCreateScreen extends ConsumerWidget {
   static const String routeName = '/energy-plan-create-screen';
 
@@ -333,12 +386,16 @@ class EnergyPlanCreateScreen extends ConsumerWidget {
 
   @override
   Widget build(context, ref) {
+    final plan = ModalRoute.of(context)!.settings.arguments;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create New Energy Plan'),
+        title:
+            Text(plan == null ? 'Create New Energy Plan' : 'Edit Energy Plan'),
       ),
       drawer: const STSDrawer(),
-      body: const CreateEnergyPlanForm(),
+      body: CreateEnergyPlanForm(
+        plan: (plan ?? EnergyPlan()) as EnergyPlan,
+      ),
     );
   }
 }

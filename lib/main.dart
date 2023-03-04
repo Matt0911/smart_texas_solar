@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:smart_texas_solar/models/billing_data.dart';
 import 'package:smart_texas_solar/models/energy_plan.dart';
+import 'package:smart_texas_solar/models/energy_plan_custom_var.dart';
 import 'package:smart_texas_solar/models/enphase_system.dart';
 import 'package:smart_texas_solar/screens/energy_bill_screen.dart';
 import 'package:smart_texas_solar/screens/energy_data_screen.dart';
@@ -31,6 +32,7 @@ void main() async {
   Hive.registerAdapter(EnphaseSystemAdapter());
   Hive.registerAdapter(BillingDataAdapter());
   Hive.registerAdapter(EnergyPlanAdapter());
+  Hive.registerAdapter(EnergyPlanCustomVarAdapter());
   runApp(const ProviderScope(child: MyApp()));
 }
 

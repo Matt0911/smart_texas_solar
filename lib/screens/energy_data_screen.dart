@@ -25,8 +25,6 @@ class EnergyDataScreen extends ConsumerWidget {
 
   @override
   Widget build(context, ref) {
-    print(IntervalTime.values.map((e) => e.index));
-    print(IntervalTime.values.map((e) => e.name));
     var selectedDates = ref.watch(selectedDatesProvider);
     var intervals = ref.watch(combinedIntervalsDataProvider);
     ref.listen<bool>(pastIntervalsDataFetcherProvider, ((previous, next) {
