@@ -78,6 +78,7 @@ class EnergyDataScreen extends ConsumerWidget {
                     }
                   },
                   child: const Text('Select Dates'),
+                  // TODO: add button to reset data for a particular day somewhere
                 )
               ],
             ),

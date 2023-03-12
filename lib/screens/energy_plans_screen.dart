@@ -122,7 +122,7 @@ class EnergyPlansScreenState extends ConsumerState<EnergyPlansScreen> {
                             isExpanded: plan.isExpanded,
                             backgroundColor: Colors.grey[850],
                             headerBuilder: (context, isExpanded) => ListTile(
-                              title: Text(plan.data.name),
+                              title: Text(plan.data.toString()),
                             ),
                             body: Column(
                               children: [
@@ -142,6 +142,22 @@ class EnergyPlansScreenState extends ConsumerState<EnergyPlansScreen> {
                                         ) as EnergyPlan?;
                                         if (updatedPlan != null) {
                                           updatedPlan.save();
+                                        }
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.copy),
+                                      color: Colors.grey,
+                                      onPressed: () async {
+                                        var planClone =
+                                            await Navigator.of(context)
+                                                .pushNamed(
+                                          EnergyPlanCreateScreen.routeName,
+                                          arguments:
+                                              EnergyPlan.clone(plan.data),
+                                        ) as EnergyPlan?;
+                                        if (planClone != null) {
+                                          addPlan(planClone);
                                         }
                                       },
                                     ),

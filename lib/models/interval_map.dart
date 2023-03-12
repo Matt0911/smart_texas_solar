@@ -6,7 +6,8 @@ final DateFormat intervalTimeFormat = DateFormat('tHHmm');
 
 Map<IntervalTime, Interval> _convertListToMap(List<Interval> intervalList) {
   Map<IntervalTime, Interval> map = {};
-  for (var interval in intervalList) {
+  for (var intervalOrig in intervalList) {
+    var interval = Interval.clone(intervalOrig);
     var key = IntervalTime.values.byName(intervalTimeFormat
         .format(interval.endTime.subtract(const Duration(minutes: 15))));
     if (map[key] != null) {

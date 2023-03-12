@@ -8,7 +8,7 @@ final DateFormat _formatter = DateFormat('MM/dd/yyyy');
 final DateFormat _formatterLong = DateFormat('yyyy/MM/dd HH:mm:ss');
 
 @HiveType(typeId: 7)
-class BillingData {
+class BillingData extends HiveObject {
   @HiveField(0)
   DateTime startDate;
   @HiveField(1)
@@ -17,6 +17,8 @@ class BillingData {
   num kwh;
   @HiveField(3)
   DateTime lastUpdate;
+  @HiveField(4)
+  num? actualBilledAmount;
 
 // actl_kwh_usg: 290
 // blld_kva_usg: "0"
@@ -28,7 +30,13 @@ class BillingData {
 // mtrd_kwh_usg: "0"
 // startdate: "12/30/2020"
 
-  BillingData(this.startDate, this.endDate, this.kwh, this.lastUpdate);
+  BillingData(
+    this.startDate,
+    this.endDate,
+    this.kwh,
+    this.lastUpdate,
+    this.actualBilledAmount,
+  );
 
   BillingData.fromData(Map<String, dynamic> billingData)
       : startDate = _formatter.parse(billingData['startdate']),

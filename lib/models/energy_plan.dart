@@ -1,9 +1,11 @@
 import 'package:hive_flutter/adapters.dart';
+import 'package:intl/intl.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:smart_texas_solar/models/energy_plan_custom_var.dart';
 import 'package:smart_texas_solar/models/interval_map.dart';
-
 part 'energy_plan.g.dart';
+
+final DateFormat _formatter = DateFormat('MM/dd/yyyy');
 
 @HiveType(typeId: 8)
 class EnergyPlan extends HiveObject {
@@ -34,7 +36,8 @@ class EnergyPlan extends HiveObject {
   String name;
 
   // string, standard calculation
-  static const String standardEquation = 'cf + (d + k) * c - s * sbr + b';
+  static const String standardEquation =
+      'cf + (d + k) * c - if_lt(s, c, s, c) * sbr + b';
 
   // string, custom calculation
   @HiveField(9)
@@ -43,6 +46,7 @@ class EnergyPlan extends HiveObject {
   @HiveField(10)
   bool usesCustomEq;
 
+  // TODO: move eqs to an object with descriptions that can be used in UI
   static Parser getParser() => Parser()
     ..addFunction(
       'if_gt',
@@ -60,8 +64,6 @@ class EnergyPlan extends HiveObject {
       'if_lte',
       (List<num> args) => args[0] <= args[1] ? args[2] : args[3],
     );
-  // TODO: figure out how to handle time ranges of consumption
-  // field for hive ID?? need to research
 
   EnergyPlan({
     this.startDate,
@@ -76,6 +78,19 @@ class EnergyPlan extends HiveObject {
     this.name = '',
     List<EnergyPlanCustomVar>? customVars,
   }) : customVars = customVars ?? [];
+
+  EnergyPlan.clone(EnergyPlan other)
+      : startDate = other.startDate?.copyWith(),
+        endDate = other.endDate?.copyWith(),
+        connectionFee = other.connectionFee,
+        deliveryCharge = other.deliveryCharge,
+        kwhCharge = other.kwhCharge,
+        baseCharge = other.baseCharge,
+        solarBuybackRate = other.solarBuybackRate,
+        customEquation = other.customEquation,
+        usesCustomEq = other.usesCustomEq,
+        name = '${other.name} copy',
+        customVars = other.customVars;
 
   num? calculateBill({
     required num consumptionGrid,
@@ -158,6 +173,15 @@ class EnergyPlan extends HiveObject {
 
   @override
   String toString() {
-    return 'billing plan';
+    if (startDate == null && endDate == null) {
+      return name;
+    }
+    if (startDate != null && endDate != null) {
+      return '$name ${_formatter.format(startDate!)} - ${_formatter.format(endDate!)}';
+    }
+    if (startDate != null) {
+      return '$name starting ${_formatter.format(startDate!)}';
+    }
+    return '$name ending ${_formatter.format(endDate!)}';
   }
 }

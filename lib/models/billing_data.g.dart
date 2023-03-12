@@ -21,13 +21,14 @@ class BillingDataAdapter extends TypeAdapter<BillingData> {
       fields[1] as DateTime,
       fields[2] as num,
       fields[3] as DateTime,
+      fields[4] as num?,
     );
   }
 
   @override
   void write(BinaryWriter writer, BillingData obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.startDate)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class BillingDataAdapter extends TypeAdapter<BillingData> {
       ..writeByte(2)
       ..write(obj.kwh)
       ..writeByte(3)
-      ..write(obj.lastUpdate);
+      ..write(obj.lastUpdate)
+      ..writeByte(4)
+      ..write(obj.actualBilledAmount);
   }
 
   @override

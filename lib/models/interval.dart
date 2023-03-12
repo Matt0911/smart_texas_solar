@@ -11,6 +11,10 @@ class Interval {
 
   Interval({required this.endTime, required this.kwh});
 
+  Interval.clone(Interval other)
+      : endTime = other.endTime.copyWith(),
+        kwh = other.kwh;
+
   void combine(Interval other) {
     kwh += other.kwh;
   }
