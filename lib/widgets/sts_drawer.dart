@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_texas_solar/screens/energy_bill_screen.dart';
+import 'package:smart_texas_solar/screens/energy_bill_history_screen.dart';
+import 'package:smart_texas_solar/screens/energy_bill_selection_screen.dart';
 import 'package:smart_texas_solar/screens/energy_data_screen.dart';
 import 'package:smart_texas_solar/screens/energy_plans_screen.dart';
 
@@ -26,14 +27,14 @@ class STSDrawer extends StatelessWidget {
                     ),
           ),
           ListTile(
-            leading: const Icon(Icons.format_list_bulleted),
-            title: const Text('Energy Bill'),
-            selected: EnergyBillScreen.routeName == currentRoute,
-            onTap: EnergyBillScreen.routeName == currentRoute
+            leading: const Icon(Icons.history),
+            title: const Text('Bill History'),
+            selected: EnergyBillHistoryScreen.routeName == currentRoute,
+            onTap: EnergyBillHistoryScreen.routeName == currentRoute
                 ? () => Navigator.pop(context)
                 : () => Navigator.pushNamed(
                       context,
-                      EnergyBillScreen.routeName,
+                      EnergyBillHistoryScreen.routeName,
                     ),
           ),
           ListTile(
@@ -45,6 +46,17 @@ class STSDrawer extends StatelessWidget {
                 : () => Navigator.pushNamed(
                       context,
                       EnergyPlansScreen.routeName,
+                    ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.calculate),
+            title: const Text('Energy Plan Cost Estimator'),
+            selected: EnergyBillSelectionScreen.routeName == currentRoute,
+            onTap: EnergyBillSelectionScreen.routeName == currentRoute
+                ? () => Navigator.pop(context)
+                : () => Navigator.pushNamed(
+                      context,
+                      EnergyBillSelectionScreen.routeName,
                     ),
           ),
         ],

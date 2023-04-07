@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:smart_texas_solar/models/billing_data.dart';
 import 'package:smart_texas_solar/models/interval_map.dart';
 import 'package:smart_texas_solar/providers/smt/billing_data_provider.dart';
@@ -15,14 +14,8 @@ import '../providers/past_intervals_data_fetcher_provider.dart';
 import '../providers/smt/api_service_provider.dart';
 import '../widgets/number_card.dart';
 
-final _formatter = DateFormat('MMM d');
-
 const kTableHeaderStyle =
     TextStyle(fontWeight: FontWeight.bold, fontSize: 16, height: 2);
-
-String getBillDateRange(DateTime start, DateTime end) {
-  return '${_formatter.format(start)} - ${_formatter.format(end)} ${end.year}';
-}
 
 class BillingListDataWrapper {
   bool isExpanded = false;
@@ -41,16 +34,17 @@ class BillingListDataWrapper {
   });
 }
 
-class EnergyBillScreen extends ConsumerStatefulWidget {
-  static const String routeName = '/energy-bill-screen';
+class EnergyBillHistoryScreen extends ConsumerStatefulWidget {
+  static const String routeName = '/energy-bill-history-screen';
 
-  const EnergyBillScreen({super.key});
+  const EnergyBillHistoryScreen({super.key});
 
   @override
-  EnergyBillScreenState createState() => EnergyBillScreenState();
+  EnergyBillHistoryScreenState createState() => EnergyBillHistoryScreenState();
 }
 
-class EnergyBillScreenState extends ConsumerState<EnergyBillScreen> {
+class EnergyBillHistoryScreenState
+    extends ConsumerState<EnergyBillHistoryScreen> {
   bool isBillingLoaded = false;
   bool isHistoryLoaded = false;
   List<BillingData> rawBillingData = [];
@@ -187,9 +181,9 @@ class EnergyBillScreenState extends ConsumerState<EnergyBillScreen> {
                         isExpanded: bill.isExpanded,
                         backgroundColor: Colors.grey[850],
                         headerBuilder: (context, isExpanded) => ListTile(
-                          title: Text(getBillDateRange(
-                              bill.rawData.startDate, bill.rawData.endDate)),
+                          title: Text(bill.rawData.toString()),
                         ),
+                        canTapOnHeader: true,
                         body: Column(
                           children: [
                             Row(

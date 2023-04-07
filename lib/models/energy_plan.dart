@@ -6,6 +6,21 @@ import 'package:smart_texas_solar/models/interval_map.dart';
 part 'energy_plan.g.dart';
 
 final DateFormat _formatter = DateFormat('MM/dd/yyyy');
+checkValidTimeRange(List<num> args) {
+  String startTime = 't${args[0].toInt().toString().padLeft(4, '0')}';
+  String endTime = 't${args[1].toInt().toString().padLeft(4, '0')}';
+  try {
+    IntervalTime.values.firstWhere((element) => element.name == startTime);
+  } catch (e) {
+    throw StateError('Invalid time range start');
+  }
+  try {
+    IntervalTime.values.firstWhere((element) => element.name == endTime);
+  } catch (e) {
+    throw StateError('Invalid time range end');
+  }
+  return 0;
+}
 
 @HiveType(typeId: 8)
 class EnergyPlan extends HiveObject {
@@ -113,16 +128,32 @@ class EnergyPlan extends HiveObject {
               (prev, time) =>
                   prev += consumptionByTime.intervals[time]?.kwh ?? 0);
           // TODO: test this
+        })
+        ..addFunction('c_not_between', (List<num> args) {
+          String startTime = 't${args[0].toInt().toString().padLeft(4, '0')}';
+          String endTime = 't${args[1].toInt().toString().padLeft(4, '0')}';
+          int startIndex = IntervalTime.values
+              .indexWhere((element) => element.name == startTime);
+          int endIndex = IntervalTime.values
+              .indexWhere((element) => element.name == endTime);
+          var desiredIntervalTimes = [
+            ...IntervalTime.values.sublist(0, startIndex),
+            ...IntervalTime.values.sublist(endIndex),
+          ];
+          return desiredIntervalTimes.fold<num>(
+              0,
+              (prev, time) =>
+                  prev += consumptionByTime.intervals[time]?.kwh ?? 0);
         });
       Expression exp =
-          p.parse(customEquation.isEmpty ? standardEquation : customEquation);
+          p.parse(usesCustomEq ? customEquation : standardEquation);
       ContextModel cm = ContextModel()
         ..bindVariable(Variable('cf'), Number(connectionFee))
         ..bindVariable(Variable('d'), Number(deliveryCharge))
         ..bindVariable(Variable('k'), Number(kwhCharge))
-        ..bindVariable(Variable('s'), Number(solarSurplus))
+        ..bindVariable(Variable('s'), Number(solarSurplus.round()))
         ..bindVariable(Variable('sbr'), Number(solarBuybackRate))
-        ..bindVariable(Variable('c'), Number(consumptionGrid))
+        ..bindVariable(Variable('c'), Number(consumptionGrid.round()))
         ..bindVariable(Variable('b'), Number(baseCharge));
       for (var customVar in customVars) {
         cm.bindVariable(Variable(customVar.symbol), Number(customVar.value));
@@ -140,22 +171,8 @@ class EnergyPlan extends HiveObject {
     List<EnergyPlanCustomVar> customVars,
   ) {
     Parser p = getParser()
-      ..addFunction('c_between', (List<num> args) {
-        String startTime = 't${args[0].toInt().toString().padLeft(4, '0')}';
-        String endTime = 't${args[1].toInt().toString().padLeft(4, '0')}';
-        try {
-          IntervalTime.values
-              .firstWhere((element) => element.name == startTime);
-        } catch (e) {
-          throw StateError('Invalid time range start');
-        }
-        try {
-          IntervalTime.values.firstWhere((element) => element.name == endTime);
-        } catch (e) {
-          throw StateError('Invalid time range end');
-        }
-        return 0;
-      });
+      ..addFunction('c_between', checkValidTimeRange)
+      ..addFunction('c_not_between', checkValidTimeRange);
     Expression exp = p.parse(customEq);
     ContextModel cm = ContextModel()
       ..bindVariable(Variable('cf'), Number(0))
@@ -173,15 +190,15 @@ class EnergyPlan extends HiveObject {
 
   @override
   String toString() {
-    if (startDate == null && endDate == null) {
-      return name;
-    }
-    if (startDate != null && endDate != null) {
-      return '$name ${_formatter.format(startDate!)} - ${_formatter.format(endDate!)}';
-    }
-    if (startDate != null) {
-      return '$name starting ${_formatter.format(startDate!)}';
-    }
-    return '$name ending ${_formatter.format(endDate!)}';
+    // if (startDate == null && endDate == null) {
+    return name;
+    // }
+    // if (startDate != null && endDate != null) {
+    //   return '$name ${_formatter.format(startDate!)} - ${_formatter.format(endDate!)}';
+    // }
+    // if (startDate != null) {
+    //   return '$name starting ${_formatter.format(startDate!)}';
+    // }
+    // return '$name ending ${_formatter.format(endDate!)}';
   }
 }

@@ -86,13 +86,13 @@ void datePickerFormFieldOnTap(
 }
 
 // Create a Form widget.
-class CreateEnergyPlanForm extends StatefulWidget {
+class EditEnergyPlanForm extends StatefulWidget {
   final EnergyPlan plan;
   final bool initialUsesCustomEq;
   final List<EnergyPlanCustomVar> customVars;
   final TextEditingController startDateCtl;
   final TextEditingController endDateCtl;
-  CreateEnergyPlanForm({super.key, required this.plan})
+  EditEnergyPlanForm({super.key, required this.plan})
       : customVars = [...plan.customVars],
         initialUsesCustomEq = plan.usesCustomEq,
         startDateCtl = TextEditingController(
@@ -104,14 +104,14 @@ class CreateEnergyPlanForm extends StatefulWidget {
         );
 
   @override
-  CreateEnergyPlanFormState createState() {
-    return CreateEnergyPlanFormState();
+  EditEnergyPlanFormState createState() {
+    return EditEnergyPlanFormState();
   }
 }
 
 // Create a corresponding State class.
 // This class holds data related to the form.
-class CreateEnergyPlanFormState extends State<CreateEnergyPlanForm> {
+class EditEnergyPlanFormState extends State<EditEnergyPlanForm> {
   final _formKey = GlobalKey<FormState>();
   late bool usesCustomEq;
 
@@ -379,10 +379,10 @@ class Heading extends StatelessWidget {
   }
 }
 
-class EnergyPlanCreateScreen extends ConsumerWidget {
-  static const String routeName = '/energy-plan-create-screen';
+class EnergyPlanEditScreen extends ConsumerWidget {
+  static const String routeName = '/energy-plan-edit-screen';
 
-  const EnergyPlanCreateScreen({super.key});
+  const EnergyPlanEditScreen({super.key});
 
   @override
   Widget build(context, ref) {
@@ -393,7 +393,7 @@ class EnergyPlanCreateScreen extends ConsumerWidget {
             Text(plan == null ? 'Create New Energy Plan' : 'Edit Energy Plan'),
       ),
       drawer: const STSDrawer(),
-      body: CreateEnergyPlanForm(
+      body: EditEnergyPlanForm(
         plan: (plan ?? EnergyPlan()) as EnergyPlan,
       ),
     );

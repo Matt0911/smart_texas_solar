@@ -40,6 +40,8 @@ class IntervalMap {
   IntervalMap(List<Interval> intervalList)
       : intervals = _convertListToMap(intervalList);
 
+  IntervalMap.copy(IntervalMap other) : intervals = {...other.intervals};
+
   Interval? getIntervalByDateTime(DateTime endDate) =>
       intervals[IntervalTime.values.byName(intervalTimeFormat
           .format(endDate.subtract(const Duration(minutes: 15))))];

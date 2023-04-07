@@ -7,9 +7,11 @@ import 'package:smart_texas_solar/models/billing_data.dart';
 import 'package:smart_texas_solar/models/energy_plan.dart';
 import 'package:smart_texas_solar/models/energy_plan_custom_var.dart';
 import 'package:smart_texas_solar/models/enphase_system.dart';
-import 'package:smart_texas_solar/screens/energy_bill_screen.dart';
+import 'package:smart_texas_solar/screens/energy_bill_history_screen.dart';
+import 'package:smart_texas_solar/screens/energy_bill_selection_screen.dart';
 import 'package:smart_texas_solar/screens/energy_data_screen.dart';
-import 'package:smart_texas_solar/screens/energy_plan_create_screen.dart';
+import 'package:smart_texas_solar/screens/energy_plan_cost_estimate_screen.dart';
+import 'package:smart_texas_solar/screens/energy_plan_edit_screen.dart';
 import 'package:smart_texas_solar/screens/energy_plans_screen.dart';
 import 'package:smart_texas_solar/util/navigator_key.dart';
 
@@ -52,10 +54,15 @@ class MyApp extends StatelessWidget {
       initialRoute: EnergyDataScreen.routeName,
       routes: {
         EnergyDataScreen.routeName: (context) => const EnergyDataScreen(),
-        EnergyBillScreen.routeName: (context) => const EnergyBillScreen(),
+        EnergyBillHistoryScreen.routeName: (context) =>
+            const EnergyBillHistoryScreen(),
         EnergyPlansScreen.routeName: (context) => const EnergyPlansScreen(),
-        EnergyPlanCreateScreen.routeName: (context) =>
-            const EnergyPlanCreateScreen(),
+        EnergyPlanEditScreen.routeName: (context) =>
+            const EnergyPlanEditScreen(),
+        EnergyBillSelectionScreen.routeName: (context) =>
+            const EnergyBillSelectionScreen(),
+        EnergyPlanCostEstimateScreen.routeName: (context) =>
+            const EnergyPlanCostEstimateScreen(),
       },
     );
   }

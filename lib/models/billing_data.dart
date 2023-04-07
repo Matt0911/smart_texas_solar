@@ -6,6 +6,11 @@ part 'billing_data.g.dart';
 
 final DateFormat _formatter = DateFormat('MM/dd/yyyy');
 final DateFormat _formatterLong = DateFormat('yyyy/MM/dd HH:mm:ss');
+final _toStringFormatter = DateFormat('MMM d');
+
+String getBillDateRange(DateTime start, DateTime end) {
+  return '${_toStringFormatter.format(start)} - ${_toStringFormatter.format(end)} ${end.year}';
+}
 
 @HiveType(typeId: 7)
 class BillingData extends HiveObject {
@@ -56,6 +61,6 @@ class BillingData extends HiveObject {
 
   @override
   String toString() {
-    return '$startDate - $endDate: $kwh consumption';
+    return getBillDateRange(startDate, endDate);
   }
 }

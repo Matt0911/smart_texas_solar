@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_texas_solar/models/energy_plan.dart';
 import 'package:smart_texas_solar/providers/hive/energy_plan_store_provider.dart';
-import 'package:smart_texas_solar/screens/energy_plan_create_screen.dart';
+import 'package:smart_texas_solar/screens/energy_plan_edit_screen.dart';
 import 'package:smart_texas_solar/widgets/sts_drawer.dart';
 
 import '../providers/past_intervals_data_fetcher_provider.dart';
@@ -102,7 +102,7 @@ class EnergyPlansScreenState extends ConsumerState<EnergyPlansScreen> {
                 TextButton.icon(
                   onPressed: () async {
                     var newPlan = await Navigator.of(context)
-                            .pushNamed(EnergyPlanCreateScreen.routeName)
+                            .pushNamed(EnergyPlanEditScreen.routeName)
                         as EnergyPlan?;
                     if (newPlan != null) {
                       addPlan(newPlan);
@@ -124,6 +124,7 @@ class EnergyPlansScreenState extends ConsumerState<EnergyPlansScreen> {
                             headerBuilder: (context, isExpanded) => ListTile(
                               title: Text(plan.data.toString()),
                             ),
+                            canTapOnHeader: true,
                             body: Column(
                               children: [
                                 Row(
@@ -137,7 +138,7 @@ class EnergyPlansScreenState extends ConsumerState<EnergyPlansScreen> {
                                         var updatedPlan =
                                             await Navigator.of(context)
                                                 .pushNamed(
-                                          EnergyPlanCreateScreen.routeName,
+                                          EnergyPlanEditScreen.routeName,
                                           arguments: plan.data,
                                         ) as EnergyPlan?;
                                         if (updatedPlan != null) {
@@ -152,7 +153,7 @@ class EnergyPlansScreenState extends ConsumerState<EnergyPlansScreen> {
                                         var planClone =
                                             await Navigator.of(context)
                                                 .pushNamed(
-                                          EnergyPlanCreateScreen.routeName,
+                                          EnergyPlanEditScreen.routeName,
                                           arguments:
                                               EnergyPlan.clone(plan.data),
                                         ) as EnergyPlan?;
