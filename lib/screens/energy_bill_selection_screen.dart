@@ -1,5 +1,3 @@
-import 'dart:js_util';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -16,7 +14,6 @@ import '../providers/enphase/api_service_provider.dart';
 import '../providers/hive/energy_plan_store_provider.dart';
 import '../providers/past_intervals_data_fetcher_provider.dart';
 import '../providers/smt/api_service_provider.dart';
-import '../widgets/number_card.dart';
 
 final _formatter = DateFormat('MMM d');
 

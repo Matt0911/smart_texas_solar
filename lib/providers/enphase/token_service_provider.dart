@@ -91,8 +91,8 @@ class EnphaseTokenService {
   }
 
   setTokens(EnphaseTokenResponse tokens) {
-    _enphaseTokenStore
-        .then<EnpahseTokenStore>((store) => store.storeTokens(tokens));
+    // TODO investigate null error
+    _enphaseTokenStore.then((store) => store.storeTokens(tokens));
   }
 
   Future<String> getAccessToken() async {
