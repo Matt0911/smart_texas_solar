@@ -40,7 +40,8 @@ class IntervalMap {
   IntervalMap(List<Interval> intervalList)
       : intervals = _convertListToMap(intervalList);
 
-  IntervalMap.copy(IntervalMap other) : intervals = {...other.intervals};
+  IntervalMap.copy(IntervalMap other)
+      : intervals = IntervalMap(other.intervals.values.toList()).intervals;
 
   Interval? getIntervalByDateTime(DateTime endDate) =>
       intervals[IntervalTime.values.byName(intervalTimeFormat
@@ -52,6 +53,18 @@ class IntervalMap {
     var key = IntervalTime.values.byName(intervalTimeFormat
         .format(interval.endTime.subtract(const Duration(minutes: 15))));
     intervals[key] = interval;
+  }
+
+  addIntervalMap(IntervalMap other) {
+    intervals.forEach((time, value) {
+      value.kwh += other.intervals[time]!.kwh;
+    });
+  }
+
+  subtractIntervalMap(IntervalMap other) {
+    intervals.forEach((time, value) {
+      value.kwh -= other.intervals[time]!.kwh;
+    });
   }
 }
 

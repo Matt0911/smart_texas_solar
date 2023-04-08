@@ -7,6 +7,7 @@ import 'package:smart_texas_solar/providers/smt/billing_data_provider.dart';
 import 'package:smart_texas_solar/screens/energy_plan_cost_estimate_screen.dart';
 import 'package:smart_texas_solar/util/date_util.dart';
 import 'package:smart_texas_solar/widgets/sts_drawer.dart';
+import 'package:collection/collection.dart';
 
 import '../models/energy_plan.dart';
 import '../models/interval.dart' as sts_interval;
@@ -32,8 +33,10 @@ class BillingCheckboxListDataWrapper {
   num totalSurplusGeneration;
   num avgSurplusGeneration;
   num totalGeneration;
+  num totalConsumption;
   num? estimatedBillAmount;
   IntervalMap periodConsumptionByTime;
+  IntervalMap periodTotalConsumptionByTime;
 
   BillingCheckboxListDataWrapper(
     this.rawData, {
@@ -42,7 +45,9 @@ class BillingCheckboxListDataWrapper {
     required this.avgGridConsumption,
     required this.totalSurplusGeneration,
     required this.avgSurplusGeneration,
+    required this.totalConsumption,
     required this.periodConsumptionByTime,
+    required this.periodTotalConsumptionByTime,
     this.estimatedBillAmount,
     this.isChecked = false,
   });
@@ -95,32 +100,47 @@ class EnergyBillSelectionScreenState
 
         num totalGridConsumption = 0;
         num totalSurplusGeneration = 0;
-        List<sts_interval.Interval> allConsumptionIntervals = [];
+        List<sts_interval.Interval> allGridConsumptionIntervals = [];
+        List<sts_interval.Interval> allSurplusIntervals = [];
         for (var dayIntervals in smtIntervalsMap.values) {
-          allConsumptionIntervals.addAll(dayIntervals.consumptionData);
+          allGridConsumptionIntervals.addAll(dayIntervals.consumptionData);
+          allSurplusIntervals.addAll(dayIntervals.surplusData);
           totalGridConsumption += dayIntervals.consumptionData
               .fold(0, (previousValue, element) => previousValue + element.kwh);
           totalSurplusGeneration += dayIntervals.surplusData
               .fold(0, (previousValue, element) => previousValue + element.kwh);
         }
-        IntervalMap periodConsumptionByTime =
-            IntervalMap(allConsumptionIntervals);
+        IntervalMap periodGridConsumptionByTime =
+            IntervalMap(allGridConsumptionIntervals);
+        IntervalMap periodSurplusByTime = IntervalMap(allSurplusIntervals);
 
         num? estimatedBillAmount;
         if (plan != null) {
           estimatedBillAmount = plan.calculateBill(
                 consumptionGrid: totalGridConsumption,
                 solarSurplus: totalSurplusGeneration,
-                consumptionByTime: periodConsumptionByTime,
+                consumptionByTime: periodGridConsumptionByTime,
               ) ??
               0;
         }
 
         num totalGeneration = 0;
+        List<sts_interval.Interval> allGenerationIntervals = [];
         for (var dayIntervals in enphaseIntervalsMap.values) {
+          allGenerationIntervals.addAll(dayIntervals.generationData);
           totalGeneration += dayIntervals.generationData
               .fold(0, (previousValue, element) => previousValue + element.kwh);
         }
+        IntervalMap periodGenerationByTime =
+            IntervalMap(allGenerationIntervals);
+
+        num totalConsumption =
+            totalGridConsumption + totalGeneration - totalSurplusGeneration;
+
+        IntervalMap periodTotalConsumptionByTime =
+            IntervalMap.copy(periodGridConsumptionByTime);
+        periodTotalConsumptionByTime.addIntervalMap(periodGenerationByTime);
+        periodTotalConsumptionByTime.subtractIntervalMap(periodSurplusByTime);
 
         num daysForBill = bill.endDate.difference(bill.startDate).inDays + 1;
 
@@ -132,7 +152,9 @@ class EnergyBillSelectionScreenState
             avgGridConsumption: totalGridConsumption / daysForBill,
             totalSurplusGeneration: totalSurplusGeneration,
             avgSurplusGeneration: totalSurplusGeneration / daysForBill,
-            periodConsumptionByTime: periodConsumptionByTime,
+            totalConsumption: totalConsumption,
+            periodConsumptionByTime: periodGridConsumptionByTime,
+            periodTotalConsumptionByTime: periodTotalConsumptionByTime,
             estimatedBillAmount: estimatedBillAmount,
             isChecked: bill.startDate.isAfter(
               getStartOfDay(DateTime.now().subtract(const Duration(days: 365)))

@@ -23,6 +23,7 @@ class BillingListDataWrapper {
   num totalGridConsumption;
   num totalSurplusGeneration;
   num totalGeneration;
+  num totalConsumption;
   num? estimatedBillAmount;
 
   BillingListDataWrapper(
@@ -30,6 +31,7 @@ class BillingListDataWrapper {
     required this.totalGeneration,
     required this.totalGridConsumption,
     required this.totalSurplusGeneration,
+    required this.totalConsumption,
     this.estimatedBillAmount,
   });
 }
@@ -107,12 +109,16 @@ class EnergyBillHistoryScreenState
               .fold(0, (previousValue, element) => previousValue + element.kwh);
         }
 
+        num totalConsumption =
+            totalGridConsumption + totalGeneration - totalSurplusGeneration;
+
         newData.add(
           BillingListDataWrapper(
             bill,
             totalGeneration: totalGeneration,
             totalGridConsumption: totalGridConsumption,
             totalSurplusGeneration: totalSurplusGeneration,
+            totalConsumption: totalConsumption,
             estimatedBillAmount: estimatedBillAmount,
           ),
         );

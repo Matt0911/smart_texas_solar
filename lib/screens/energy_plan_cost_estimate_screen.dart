@@ -15,12 +15,14 @@ const kTableHeaderStyle =
 class EnergyPlanWrapper {
   bool isExpanded = false;
   num totalCost;
+  num totalCostNoSolar;
   EnergyPlan data;
   List<String> bills;
 
   EnergyPlanWrapper(
     this.data, {
     this.totalCost = 0,
+    this.totalCostNoSolar = 0,
     List<String>? bills,
   }) : bills = bills ?? [];
 }
@@ -47,12 +49,20 @@ class EnergyPlanCostEstimateListState
   void setData() async {
     List<EnergyPlanWrapper> wrappedData = rawPlansData.map((plan) {
       List<String> bills = [];
+      num totalCostNoSolar = 0;
       num totalCost = widget.selectedBills.fold<num>(0, (prev, bill) {
         num gridCons = bill.totalGridConsumption;
+        num totalCons = bill.totalConsumption;
         IntervalMap cByTime = IntervalMap.copy(bill.periodConsumptionByTime);
         if (modifyEnergyUsage) {
           gridCons += usageChange;
           cByTime.intervals[timeToModify]!.kwh += usageChange;
+        }
+        IntervalMap cTotalByTime =
+            IntervalMap.copy(bill.periodTotalConsumptionByTime);
+        if (modifyEnergyUsage) {
+          totalCons += usageChange;
+          cTotalByTime.intervals[timeToModify]!.kwh += usageChange;
         }
 
         num billCost = plan.calculateBill(
@@ -60,11 +70,20 @@ class EnergyPlanCostEstimateListState
           solarSurplus: bill.totalSurplusGeneration,
           consumptionByTime: cByTime,
         )!;
+        num billCostNoSolar = plan.calculateBill(
+          consumptionGrid: totalCons,
+          solarSurplus: 0,
+          consumptionByTime: cTotalByTime,
+        )!;
+        totalCostNoSolar += billCostNoSolar;
         bills.add(
             '${bill.rawData.toString()}: \$${billCost.toStringAsFixed(2)}');
         return prev + billCost;
       });
-      return EnergyPlanWrapper(plan, totalCost: totalCost, bills: bills);
+      return EnergyPlanWrapper(plan,
+          totalCost: totalCost,
+          totalCostNoSolar: totalCostNoSolar,
+          bills: bills);
     }).toList();
 
     setState(() {
@@ -147,6 +166,8 @@ class EnergyPlanCostEstimateListState
                         body: Column(
                           children: [
                             ...plan.bills.map((e) => Text(e)).toList(),
+                            Text(
+                                'Total cost no solar: \$${plan.totalCostNoSolar.toStringAsFixed(2)}'),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
