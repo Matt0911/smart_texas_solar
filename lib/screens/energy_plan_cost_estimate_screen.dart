@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_texas_solar/models/energy_plan.dart';
 import 'package:smart_texas_solar/models/interval_map.dart';
@@ -38,6 +39,8 @@ class EnergyPlanCostEstimateList extends ConsumerStatefulWidget {
 
 class EnergyPlanCostEstimateListState
     extends ConsumerState<EnergyPlanCostEstimateList> {
+  late TextEditingController _controller;
+
   bool arePlansLoaded = false;
   bool isHistoryLoaded = false;
   List<EnergyPlan> rawPlansData = [];
@@ -45,6 +48,7 @@ class EnergyPlanCostEstimateListState
   bool modifyEnergyUsage = false;
   num usageChange = 0;
   IntervalTime timeToModify = IntervalTime.t0000;
+  bool settingsOpen = false;
 
   void setData() async {
     List<EnergyPlanWrapper> wrappedData = rawPlansData.map((plan) {
@@ -101,6 +105,7 @@ class EnergyPlanCostEstimateListState
   @override
   void initState() {
     super.initState();
+    _controller = TextEditingController(text: usageChange.toStringAsFixed(0));
     isHistoryLoaded = !ref.read(pastIntervalsDataFetcherProvider);
     ref.read(energyPlanStoreProvider.future).then((energyPlanStore) {
       setState(() {
@@ -139,84 +144,206 @@ class EnergyPlanCostEstimateListState
     return Scaffold(
       appBar: AppBar(
         title: const Text('Energy Plan Cost Estimates'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              if (settingsOpen) {
+                setData();
+              }
+              setState(() {
+                settingsOpen = !settingsOpen;
+              });
+            },
+            icon: const Icon(
+              Icons.settings,
+              // color: Colors.red,
+            ),
+          )
+        ],
       ),
       drawer: const STSDrawer(),
       body: arePlansLoaded && isHistoryLoaded
-          ? SingleChildScrollView(
-              child: ExpansionPanelList(
-                expansionCallback: (panelIndex, isExpanded) => setState(() {
-                  data[panelIndex].isExpanded = !isExpanded;
-                }),
-                // TODO: UI for consumption mod (toggle should modify, kwh delta, time select)
-                children: data
-                    .map(
-                      (plan) => ExpansionPanel(
-                        isExpanded: plan.isExpanded,
-                        backgroundColor: Colors.grey[850],
-                        headerBuilder: (context, isExpanded) => ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(plan.data.toString()),
-                              Text('\$${plan.totalCost.toStringAsFixed(2)}'),
-                            ],
-                          ),
-                        ),
-                        canTapOnHeader: true,
-                        body: Column(
-                          children: [
-                            ...plan.bills.map((e) => Text(e)).toList(),
-                            Text(
-                                'Total cost no solar: \$${plan.totalCostNoSolar.toStringAsFixed(2)}'),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+          ? Column(
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: settingsOpen ? 203 : 0,
+                  child: settingsOpen
+                      ? Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade800,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(16)),
+                            ),
+                            child: Column(
                               children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  color: Colors.grey,
-                                  onPressed: () async {
-                                    var updatedPlan =
-                                        await Navigator.of(context).pushNamed(
-                                      EnergyPlanEditScreen.routeName,
-                                      arguments: plan.data,
-                                    ) as EnergyPlan?;
-                                    if (updatedPlan != null) {
-                                      updatedPlan.save();
-                                      setData();
-                                    }
-                                  },
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text('Modify Energy Consumption?'),
+                                    Checkbox(
+                                      value: modifyEnergyUsage,
+                                      onChanged: (bool? val) {
+                                        setState(() {
+                                          modifyEnergyUsage = val ?? false;
+                                        });
+                                      },
+                                    ),
+                                  ],
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.copy),
-                                  color: Colors.grey,
-                                  onPressed: () async {
-                                    var planClone =
-                                        await Navigator.of(context).pushNamed(
-                                      EnergyPlanEditScreen.routeName,
-                                      arguments: EnergyPlan.clone(plan.data),
-                                    ) as EnergyPlan?;
-                                    if (planClone != null) {
-                                      addPlan(planClone);
-                                    }
-                                  },
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Expanded(
+                                        flex: 2,
+                                        child:
+                                            Text('Consumption Change (kWh)')),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _controller,
+                                        decoration: const InputDecoration(
+                                          labelText: "Enter your number",
+                                        ),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            if (value == '' || value == '-') {
+                                              usageChange = 0;
+                                            } else {
+                                              usageChange =
+                                                  double.tryParse(value) ?? 0;
+                                            }
+                                          });
+                                        },
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(
+                                              RegExp("^-?\\d*\$",
+                                                  multiLine: true))
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  color: Colors.red,
-                                  onPressed: () async {
-                                    await plan.data.delete();
-                                    rawPlansData.remove(plan.data);
-                                    setData();
-                                  },
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text('Time to Modify'),
+                                    DropdownButton(
+                                      items: IntervalTime.values
+                                          .map((e) => DropdownMenuItem(
+                                                value: e,
+                                                child: Text(e.displayName),
+                                              ))
+                                          .toList(),
+                                      value: timeToModify,
+                                      onChanged: (IntervalTime? selected) {
+                                        setState(() {
+                                          timeToModify =
+                                              selected ?? IntervalTime.t0000;
+                                        });
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
+                          ),
+                        )
+                      : const SizedBox(),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: ExpansionPanelList(
+                      expansionCallback: (panelIndex, isExpanded) =>
+                          setState(() {
+                        data[panelIndex].isExpanded = !isExpanded;
+                      }),
+                      // TODO: UI for consumption mod (toggle should modify, kwh delta, time select)
+                      children: data
+                          .map(
+                            (plan) => ExpansionPanel(
+                              isExpanded: plan.isExpanded,
+                              backgroundColor: Colors.grey[850],
+                              headerBuilder: (context, isExpanded) => ListTile(
+                                title: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(plan.data.toString()),
+                                    Text(
+                                        '\$${plan.totalCost.toStringAsFixed(2)}'),
+                                  ],
+                                ),
+                              ),
+                              canTapOnHeader: true,
+                              body: Column(
+                                children: [
+                                  ...plan.bills.map((e) => Text(e)).toList(),
+                                  Text(
+                                      'Total cost no solar: \$${plan.totalCostNoSolar.toStringAsFixed(2)}'),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.edit),
+                                        color: Colors.grey,
+                                        onPressed: () async {
+                                          var updatedPlan =
+                                              await Navigator.of(context)
+                                                  .pushNamed(
+                                            EnergyPlanEditScreen.routeName,
+                                            arguments: plan.data,
+                                          ) as EnergyPlan?;
+                                          if (updatedPlan != null) {
+                                            updatedPlan.save();
+                                            setData();
+                                          }
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.copy),
+                                        color: Colors.grey,
+                                        onPressed: () async {
+                                          var planClone =
+                                              await Navigator.of(context)
+                                                  .pushNamed(
+                                            EnergyPlanEditScreen.routeName,
+                                            arguments:
+                                                EnergyPlan.clone(plan.data),
+                                          ) as EnergyPlan?;
+                                          if (planClone != null) {
+                                            addPlan(planClone);
+                                          }
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete),
+                                        color: Colors.red,
+                                        onPressed: () async {
+                                          await plan.data.delete();
+                                          rawPlansData.remove(plan.data);
+                                          setData();
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ),
+              ],
             )
           : const Text('Loading...'),
     );
