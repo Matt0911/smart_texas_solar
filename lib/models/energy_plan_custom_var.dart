@@ -10,15 +10,13 @@ class EnergyPlanCustomVar {
   num value;
   @HiveField(2)
   String symbol;
+  @HiveField(3)
+  bool includeInPartial;
 
   EnergyPlanCustomVar({
     this.name = '',
     this.value = 0,
     this.symbol = '',
+    this.includeInPartial = true,
   });
-
-  @override
-  String toString() {
-    return 'energy plan';
-  }
 }

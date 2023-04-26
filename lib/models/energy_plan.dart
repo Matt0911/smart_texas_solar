@@ -127,7 +127,6 @@ class EnergyPlan extends HiveObject {
               0,
               (prev, time) =>
                   prev += consumptionByTime.intervals[time]?.kwh ?? 0);
-          // TODO: test this
         })
         ..addFunction('c_not_between', (List<num> args) {
           String startTime = 't${args[0].toInt().toString().padLeft(4, '0')}';
@@ -157,6 +156,67 @@ class EnergyPlan extends HiveObject {
         ..bindVariable(Variable('b'), Number(baseCharge));
       for (var customVar in customVars) {
         cm.bindVariable(Variable(customVar.symbol), Number(customVar.value));
+      }
+      num result = exp.evaluate(EvaluationType.REAL, cm);
+      return result;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  // this is used for daily or hourly estimates and sets monthly fees to 0
+  num? calculateBillPartial({
+    required num consumptionGrid,
+    required num solarSurplus,
+    required IntervalMap consumptionByTime,
+    num partialFraction = 0,
+  }) {
+    try {
+      Parser p = getParser()
+        ..addFunction('c_between', (List<num> args) {
+          String startTime = 't${args[0].toInt().toString().padLeft(4, '0')}';
+          String endTime = 't${args[1].toInt().toString().padLeft(4, '0')}';
+          int startIndex = IntervalTime.values
+              .indexWhere((element) => element.name == startTime);
+          int endIndex = IntervalTime.values
+              .indexWhere((element) => element.name == endTime);
+          var desiredIntervalTimes =
+              IntervalTime.values.sublist(startIndex, endIndex);
+          return desiredIntervalTimes.fold<num>(
+              0,
+              (prev, time) =>
+                  prev += consumptionByTime.intervals[time]?.kwh ?? 0);
+        })
+        ..addFunction('c_not_between', (List<num> args) {
+          String startTime = 't${args[0].toInt().toString().padLeft(4, '0')}';
+          String endTime = 't${args[1].toInt().toString().padLeft(4, '0')}';
+          int startIndex = IntervalTime.values
+              .indexWhere((element) => element.name == startTime);
+          int endIndex = IntervalTime.values
+              .indexWhere((element) => element.name == endTime);
+          var desiredIntervalTimes = [
+            ...IntervalTime.values.sublist(0, startIndex),
+            ...IntervalTime.values.sublist(endIndex),
+          ];
+          return desiredIntervalTimes.fold<num>(
+              0,
+              (prev, time) =>
+                  prev += consumptionByTime.intervals[time]?.kwh ?? 0);
+        });
+      Expression exp =
+          p.parse(usesCustomEq ? customEquation : standardEquation);
+      ContextModel cm = ContextModel()
+        ..bindVariable(Variable('cf'), Number(connectionFee * partialFraction))
+        ..bindVariable(Variable('d'), Number(deliveryCharge))
+        ..bindVariable(Variable('k'), Number(kwhCharge))
+        ..bindVariable(Variable('s'), Number(solarSurplus))
+        ..bindVariable(Variable('sbr'), Number(solarBuybackRate))
+        ..bindVariable(Variable('c'), Number(consumptionGrid))
+        ..bindVariable(Variable('b'), Number(baseCharge * partialFraction));
+      for (var customVar in customVars) {
+        cm.bindVariable(Variable(customVar.symbol),
+            Number(customVar.includeInPartial ? customVar.value : 0));
       }
       num result = exp.evaluate(EvaluationType.REAL, cm);
       return result;

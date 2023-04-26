@@ -1,8 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_texas_solar/models/combined_interval.dart';
+import 'package:smart_texas_solar/models/energy_plan.dart';
 import 'package:smart_texas_solar/models/interval_map.dart';
 import 'package:smart_texas_solar/providers/enphase/intervals_data_provider.dart';
+import 'package:smart_texas_solar/providers/hive/energy_plan_store_provider.dart';
 import 'package:smart_texas_solar/providers/smt/intervals_data_provider.dart';
+import 'package:smart_texas_solar/util/date_util.dart';
 
 import '../models/enphase_intervals.dart';
 import '../models/smt_intervals.dart';
@@ -11,9 +16,13 @@ final combinedIntervalsDataProvider =
     FutureProvider.autoDispose<CombinedIntervalsData>((ref) async {
   var smtIntervals = await ref.watch(smtIntervalsDataProvider.future);
   var enphaseIntervals = await ref.watch(enphaseIntervalsDataProvider.future);
+  var energyPlanStore = await ref.watch(energyPlanStoreProvider.future);
 
   return CombinedIntervalsData(
-      smtData: smtIntervals, enpahseData: enphaseIntervals);
+    smtData: smtIntervals,
+    enpahseData: enphaseIntervals,
+    energyPlanStore: energyPlanStore,
+  );
 });
 
 int _getNumberOfIntervalsToCombine(int numDaysToDisplay) {
@@ -32,108 +41,92 @@ int _getNumberOfIntervalsToCombine(int numDaysToDisplay) {
   return 96; // daily data
 }
 
-Map<DateTime, List<CombinedInterval>> _combineEnphaseAndSMTData(
+List<CombinedInterval> _combineEnphaseAndSMTData(
   Map<DateTime, EnphaseIntervals> enpahseData,
   Map<DateTime, SMTIntervals> smtData,
+  EnergyPlanStore energyPlanStore,
 ) {
   assert(enpahseData.length == smtData.length);
-  Map<DateTime, List<CombinedInterval>> data = {};
+  List<CombinedInterval> intervalList = [];
   int sliceSize = _getNumberOfIntervalsToCombine(enpahseData.length);
   for (var day in enpahseData.keys) {
-    data[day] = <CombinedInterval>[];
-    var enphase = enpahseData[day]!.generationMap;
-    var smtConsumption = smtData[day]!.consumptionMap;
-    var smtSurplus = smtData[day]!.surplusMap;
+    // TODO: handle combining days together
+    var production = enpahseData[day]!.generationMap;
+    var gridConsumption = smtData[day]!.consumptionMap;
+    var surplusProduction = smtData[day]!.surplusMap;
 
     for (int i = 0; i < IntervalTime.values.length; i += sliceSize) {
-      var itSublist = IntervalTime.values.sublist(i, i + sliceSize);
-      data[day]!.add(
-        // TODO: handle combining days together
+      var desiredTimes = IntervalTime.values.sublist(i, i + sliceSize);
+      var filteredProduction = IntervalMap.filtered(production, desiredTimes);
+      var filteredGridConsumption =
+          IntervalMap.filtered(gridConsumption, desiredTimes);
+      var filteredSurplusProduction =
+          IntervalMap.filtered(surplusProduction, desiredTimes);
+
+      num kwhSolarProduction = filteredProduction.totalKwh;
+      num kwhGridConsumption = max(filteredGridConsumption.totalKwh, 0);
+      num kwhSurplusGeneration = filteredSurplusProduction.totalKwh;
+
+      print(
+          'p: $kwhSolarProduction, g: $kwhGridConsumption, s: $kwhSurplusGeneration');
+
+      DateTime startTime = production
+          .getInterval(desiredTimes.first)!
+          .endTime
+          .subtract(const Duration(minutes: 15));
+      DateTime endTime = production.getInterval(desiredTimes.last)!.endTime;
+      EnergyPlan? plan = energyPlanStore.getEnergyPlanForDate(endTime);
+
+      num partialFraction = 1 / (getDaysInMonth(startTime) * 96 / sliceSize);
+
+      intervalList.add(
         CombinedInterval(
-          endTime: enphase.getInterval(itSublist.last)!.endTime,
-          startTime: enphase
-              .getInterval(itSublist.first)!
-              .endTime
-              .subtract(const Duration(minutes: 15)),
-          kwhGridConsumption: itSublist
-              .map(
-                (it) => smtConsumption.getInterval(it)!.kwh,
-              )
-              .fold<num>(
-                0,
-                (prev, element) => prev + element,
-              ),
-          kwhSurplusGeneration: itSublist
-              .map(
-                (it) => smtSurplus.getInterval(it)!.kwh,
-              )
-              .fold<num>(
-                0,
-                (prev, element) => prev + element,
-              ),
-          kwhSolarProduction: itSublist
-              .map(
-                (it) => enphase.getInterval(it)!.kwh,
-              )
-              .fold<num>(
-                0,
-                (prev, element) => prev + element,
-              ),
+          startTime: startTime,
+          endTime: endTime,
+          kwhGridConsumption: kwhGridConsumption,
+          kwhSurplusGeneration: kwhSurplusGeneration,
+          kwhSolarProduction: kwhSolarProduction,
+          cost: plan?.calculateBillPartial(
+            consumptionGrid: kwhGridConsumption,
+            solarSurplus: kwhSurplusGeneration,
+            consumptionByTime: filteredGridConsumption,
+            partialFraction: partialFraction,
+          ),
         ),
       );
     }
   }
-  return data;
+  return intervalList;
 }
 
 class CombinedIntervalsData {
-  Map<DateTime, List<CombinedInterval>> intervalsData;
+  List<CombinedInterval> intervalsList;
 
   num get totalConsumption {
-    return intervalsData.values.fold<num>(
+    return intervalsList.fold<num>(
       0,
-      (sum, l) =>
-          sum +
-          l.fold<num>(
-            0,
-            (s, i) => s + i.kwhTotalConsumption,
-          ),
+      (sum, i) => sum + i.kwhTotalConsumption,
     );
   }
 
   num get totalGrid {
-    return intervalsData.values.fold<num>(
+    return intervalsList.fold<num>(
       0,
-      (sum, l) =>
-          sum +
-          l.fold<num>(
-            0,
-            (s, i) => s + i.kwhGridConsumption,
-          ),
+      (sum, i) => sum + i.kwhGridConsumption,
     );
   }
 
   num get totalProduction {
-    return intervalsData.values.fold<num>(
+    return intervalsList.fold<num>(
       0,
-      (sum, l) =>
-          sum +
-          l.fold<num>(
-            0,
-            (s, i) => s + i.kwhSolarProduction,
-          ),
+      (sum, i) => sum + i.kwhSolarProduction,
     );
   }
 
   num get totalSurplus {
-    return intervalsData.values.fold<num>(
+    return intervalsList.fold<num>(
       0,
-      (sum, l) =>
-          sum +
-          l.fold<num>(
-            0,
-            (s, i) => s + i.kwhSurplusGeneration,
-          ),
+      (sum, i) => sum + i.kwhSurplusGeneration,
     );
   }
 
@@ -141,12 +134,14 @@ class CombinedIntervalsData {
     return totalProduction - totalConsumption;
   }
 
-  List<CombinedInterval> get intervalsList => intervalsData.values.reduce(
-        (value, element) => [...value, ...element],
-      );
+  num get totalCost {
+    return intervalsList.fold(0, (sum, i) => sum + (i.cost ?? 0));
+  }
 
-  CombinedIntervalsData(
-      {required Map<DateTime, EnphaseIntervals> enpahseData,
-      required Map<DateTime, SMTIntervals> smtData})
-      : intervalsData = _combineEnphaseAndSMTData(enpahseData, smtData);
+  CombinedIntervalsData({
+    required Map<DateTime, EnphaseIntervals> enpahseData,
+    required Map<DateTime, SMTIntervals> smtData,
+    required EnergyPlanStore energyPlanStore,
+  }) : intervalsList =
+            _combineEnphaseAndSMTData(enpahseData, smtData, energyPlanStore);
 }

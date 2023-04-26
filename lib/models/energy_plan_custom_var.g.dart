@@ -20,19 +20,22 @@ class EnergyPlanCustomVarAdapter extends TypeAdapter<EnergyPlanCustomVar> {
       name: fields[0] as String,
       value: fields[1] as num,
       symbol: fields[2] as String,
+      includeInPartial: fields[3] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, EnergyPlanCustomVar obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
       ..write(obj.value)
       ..writeByte(2)
-      ..write(obj.symbol);
+      ..write(obj.symbol)
+      ..writeByte(3)
+      ..write(obj.includeInPartial);
   }
 
   @override

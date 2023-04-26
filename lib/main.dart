@@ -35,6 +35,11 @@ void main() async {
   Hive.registerAdapter(BillingDataAdapter());
   Hive.registerAdapter(EnergyPlanAdapter());
   Hive.registerAdapter(EnergyPlanCustomVarAdapter());
+  // var _box = await Hive.openBox<EnergyPlan>('energyPlans');
+  // // _box.flush();
+  // _box.clear();
+  // _box.deleteFromDisk();
+  // print('deleted box');
   runApp(const ProviderScope(child: MyApp()));
 }
 

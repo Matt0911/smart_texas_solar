@@ -57,13 +57,13 @@ class EnergyPlanCostEstimateListState
       num totalCost = widget.selectedBills.fold<num>(0, (prev, bill) {
         num gridCons = bill.totalGridConsumption;
         num totalCons = bill.totalConsumption;
-        IntervalMap cByTime = IntervalMap.copy(bill.periodConsumptionByTime);
+        IntervalMap cByTime = IntervalMap.clone(bill.periodConsumptionByTime);
         if (modifyEnergyUsage) {
           gridCons += usageChange;
           cByTime.intervals[timeToModify]!.kwh += usageChange;
         }
         IntervalMap cTotalByTime =
-            IntervalMap.copy(bill.periodTotalConsumptionByTime);
+            IntervalMap.clone(bill.periodTotalConsumptionByTime);
         if (modifyEnergyUsage) {
           totalCons += usageChange;
           cTotalByTime.intervals[timeToModify]!.kwh += usageChange;

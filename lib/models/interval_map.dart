@@ -34,20 +34,37 @@ Map<IntervalTime, Interval> _convertListToMap(List<Interval> intervalList) {
   return map;
 }
 
+List<Interval> _getFilteredIntervals(
+    Map<IntervalTime, Interval> intervalsMap, List<IntervalTime> desiredTimes) {
+  List<Interval> filtered = [];
+  for (var time in desiredTimes) {
+    filtered.add(Interval.clone(intervalsMap[time]!));
+  }
+  return filtered;
+}
+
 class IntervalMap {
   Map<IntervalTime, Interval> intervals;
 
   IntervalMap(List<Interval> intervalList)
       : intervals = _convertListToMap(intervalList);
 
-  IntervalMap.copy(IntervalMap other)
-      : intervals = IntervalMap(other.intervals.values.toList()).intervals;
+  IntervalMap.clone(IntervalMap other)
+      : intervals = _convertListToMap(other.intervals.values.toList());
+
+  IntervalMap.filtered(IntervalMap other, List<IntervalTime> desiredTimes)
+      : intervals = _convertListToMap(
+          _getFilteredIntervals(other.intervals, desiredTimes),
+        );
 
   Interval? getIntervalByDateTime(DateTime endDate) =>
       intervals[IntervalTime.values.byName(intervalTimeFormat
           .format(endDate.subtract(const Duration(minutes: 15))))];
 
   Interval? getInterval(IntervalTime time) => intervals[time];
+
+  num get totalKwh =>
+      intervals.values.fold<num>(0, (sum, interval) => sum + interval.kwh);
 
   addInterval(Interval interval) {
     var key = IntervalTime.values.byName(intervalTimeFormat

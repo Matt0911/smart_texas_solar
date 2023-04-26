@@ -289,6 +289,13 @@ class EditEnergyPlanFormState extends State<EditEnergyPlanForm> {
                                 onChanged: (val) =>
                                     setState(() => e.symbol = val),
                               ),
+                              SwitchListTile(
+                                title: const Text(
+                                    'Include in daily cost estimates?'),
+                                value: e.includeInPartial,
+                                onChanged: (val) =>
+                                    setState(() => e.includeInPartial = val),
+                              ),
                             ],
                           ),
                         ),

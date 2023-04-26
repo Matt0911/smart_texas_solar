@@ -70,6 +70,12 @@ class _IntervalsChartState extends State<IntervalsChart> {
                       value: interval.kwhSolarProduction -
                           interval.kwhTotalConsumption,
                     ),
+                    _getTooltipRow(
+                      text: 'Cost',
+                      value: interval.cost ?? 0,
+                      unit: '\$',
+                      unitBefore: true,
+                    ),
                   ],
                 )
               ],
@@ -82,8 +88,29 @@ class _IntervalsChartState extends State<IntervalsChart> {
   @override
   Widget build(BuildContext context) {
     return SfCartesianChart(
+      legend: Legend(
+        isVisible: true,
+        itemPadding: 20,
+        iconHeight: 20,
+        iconWidth: 20,
+        overflowMode: LegendItemOverflowMode.wrap,
+      ),
       primaryXAxis: DateTimeAxis(),
-      primaryYAxis: NumericAxis(labelFormat: '{value} kWh'),
+      primaryYAxis: NumericAxis(title: AxisTitle(text: 'kWh')),
+      zoomPanBehavior: ZoomPanBehavior(
+        enablePinching: true,
+        enablePanning: true,
+        zoomMode: ZoomMode.x,
+      ),
+      axes: [
+        NumericAxis(
+            name: 'yAxis2',
+            labelFormat: '\${value}',
+            decimalPlaces: 4,
+            opposedPosition: true,
+            majorGridLines:
+                const MajorGridLines(color: Color.fromARGB(255, 0, 38, 70)))
+      ],
       tooltipBehavior: _tooltipBehavior,
       series: <ChartSeries>[
         AreaSeries<CombinedInterval, DateTime>(
@@ -95,20 +122,56 @@ class _IntervalsChartState extends State<IntervalsChart> {
           enableTooltip: true,
         ),
         AreaSeries<CombinedInterval, DateTime>(
-          name: 'Consumption',
+          name: 'Surplus',
+          dataSource: widget.intervalsData,
+          xValueMapper: (data, _) => data.startTime,
+          yValueMapper: (data, _) => data.kwhSurplusGeneration,
+          color: Colors.green.shade500,
+          enableTooltip: true,
+        ),
+        AreaSeries<CombinedInterval, DateTime>(
+          name: 'Consumption Total',
           dataSource: widget.intervalsData,
           xValueMapper: (data, _) => data.startTime,
           yValueMapper: (data, _) => data.kwhTotalConsumption,
           color: Colors.red.shade300,
-          opacity: 0.75,
+          opacity: 0.6,
           enableTooltip: true,
+          animationDelay: 500,
+        ),
+        AreaSeries<CombinedInterval, DateTime>(
+          name: 'Consumption Grid',
+          dataSource: widget.intervalsData,
+          xValueMapper: (data, _) => data.startTime,
+          yValueMapper: (data, _) => data.kwhGridConsumption,
+          color: Colors.red.shade500,
+          opacity: 0.4,
+          enableTooltip: true,
+          animationDelay: 500,
+        ),
+        LineSeries<CombinedInterval, DateTime>(
+          name: 'Cost',
+          dataSource: widget.intervalsData,
+          xValueMapper: (data, _) => data.startTime,
+          yValueMapper: (data, _) => data.cost,
+          color: Colors.blue.shade800,
+          enableTooltip: true,
+          yAxisName: 'yAxis2',
+          width: .75,
+          animationDelay: 1000,
         ),
       ],
     );
   }
 }
 
-TableRow _getTooltipRow({required String text, required num value}) => TableRow(
+TableRow _getTooltipRow({
+  required String text,
+  required num value,
+  String unit = 'kWh',
+  bool unitBefore = false,
+}) =>
+    TableRow(
       children: [
         Text(
           '$text:',
@@ -117,7 +180,9 @@ TableRow _getTooltipRow({required String text, required num value}) => TableRow(
         Container(
           alignment: Alignment.centerRight,
           child: Text(
-            '${value.toStringAsFixed(3)} kWh',
+            unitBefore
+                ? '$unit${value.toStringAsFixed(3)}'
+                : '${value.toStringAsFixed(3)} $unit',
             style: kTooltipTextStyle,
           ),
         ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_texas_solar/models/interval_map.dart';
 import 'package:smart_texas_solar/providers/past_intervals_data_fetcher_provider.dart';
 import 'package:smart_texas_solar/widgets/sts_drawer.dart';
 
@@ -11,11 +10,12 @@ import '../widgets/intervals_chart.dart';
 import '../widgets/number_card.dart';
 
 final _formatter = DateFormat('MMM dd, yyyy');
+final _formatterNoYear = DateFormat('MMM dd');
 String getSelectedDateText(DateTime start, DateTime end) {
   var startStr = _formatter.format(start);
   var endStr = _formatter.format(end);
   if (startStr == endStr) return startStr;
-  return '$startStr - $endStr';
+  return '${_formatterNoYear.format(start)} - $endStr';
 }
 
 class EnergyDataScreen extends ConsumerWidget {
@@ -44,45 +44,48 @@ class EnergyDataScreen extends ConsumerWidget {
     }));
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Energy Data'),
+          title: Text(
+              'Energy Data: ${getSelectedDateText(selectedDates.startDate, selectedDates.endDate)}'),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                DateTimeRange? range = await showDateRangePicker(
+                  context: context,
+                  firstDate: DateTime(2010),
+                  lastDate: DateTime.now().subtract(const Duration(days: 2)),
+                  initialDateRange: DateTimeRange(
+                    start: selectedDates.startDate,
+                    end: selectedDates.endDate,
+                  ),
+                );
+                if (range != null) {
+                  selectedDates.updateDates(
+                    start: range.start,
+                    end: range.end,
+                  );
+                }
+              },
+              icon: const Icon(
+                Icons.calendar_today,
+              ),
+              // TODO: add button to reset data for a particular day somewhere
+            )
+          ],
         ),
         drawer: const STSDrawer(),
         body: Column(children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Text(
-                  getSelectedDateText(
-                      selectedDates.startDate, selectedDates.endDate),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    DateTimeRange? range = await showDateRangePicker(
-                      context: context,
-                      firstDate: DateTime(2010),
-                      lastDate:
-                          DateTime.now().subtract(const Duration(days: 2)),
-                      initialDateRange: DateTimeRange(
-                        start: selectedDates.startDate,
-                        end: selectedDates.endDate,
-                      ),
-                    );
-                    if (range != null) {
-                      selectedDates.updateDates(
-                        start: range.start,
-                        end: range.end,
-                      );
-                    }
-                  },
-                  child: const Text('Select Dates'),
-                  // TODO: add button to reset data for a particular day somewhere
-                )
-              ],
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.all(8.0),
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //     children: [
+          //       Text(
+          //         ,
+          //         style: const TextStyle(fontWeight: FontWeight.bold),
+          //       ),
+          //     ],
+          //   ),
+          // ),
           intervals.when(
             data: (combinedIntervals) {
               num totalConsumption = combinedIntervals.totalConsumption;
@@ -90,6 +93,7 @@ class EnergyDataScreen extends ConsumerWidget {
               num totalProduction = combinedIntervals.totalProduction;
               num totalSurplus = combinedIntervals.totalSurplus;
               num totalNet = combinedIntervals.totalNet;
+              num totalCost = combinedIntervals.totalCost;
               return Expanded(
                 child: Column(
                   children: [

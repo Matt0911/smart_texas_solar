@@ -45,3 +45,8 @@ DateTime getEndOfMonth(DateTime date) {
     date.second,
   );
 }
+
+int getDaysInMonth(DateTime date) {
+  DateTime monthStart = DateTime(date.year, date.month, 0);
+  return DateTime(date.year, date.month + 1, 0).difference(monthStart).inDays;
+}

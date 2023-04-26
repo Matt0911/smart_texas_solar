@@ -138,7 +138,7 @@ class EnergyBillSelectionScreenState
             totalGridConsumption + totalGeneration - totalSurplusGeneration;
 
         IntervalMap periodTotalConsumptionByTime =
-            IntervalMap.copy(periodGridConsumptionByTime);
+            IntervalMap.clone(periodGridConsumptionByTime);
         periodTotalConsumptionByTime.addIntervalMap(periodGenerationByTime);
         periodTotalConsumptionByTime.subtractIntervalMap(periodSurplusByTime);
 
