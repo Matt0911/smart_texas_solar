@@ -67,9 +67,6 @@ List<CombinedInterval> _combineEnphaseAndSMTData(
       num kwhGridConsumption = max(filteredGridConsumption.totalKwh, 0);
       num kwhSurplusGeneration = filteredSurplusProduction.totalKwh;
 
-      print(
-          'p: $kwhSolarProduction, g: $kwhGridConsumption, s: $kwhSurplusGeneration');
-
       DateTime startTime = production
           .getInterval(desiredTimes.first)!
           .endTime

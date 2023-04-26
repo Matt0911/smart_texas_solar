@@ -43,126 +43,45 @@ class EnergyDataScreen extends ConsumerWidget {
       }
     }));
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-              'Energy Data: ${getSelectedDateText(selectedDates.startDate, selectedDates.endDate)}'),
-          actions: [
-            IconButton(
-              onPressed: () async {
-                DateTimeRange? range = await showDateRangePicker(
-                  context: context,
-                  firstDate: DateTime(2010),
-                  lastDate: DateTime.now().subtract(const Duration(days: 2)),
-                  initialDateRange: DateTimeRange(
-                    start: selectedDates.startDate,
-                    end: selectedDates.endDate,
-                  ),
-                );
-                if (range != null) {
-                  selectedDates.updateDates(
-                    start: range.start,
-                    end: range.end,
-                  );
-                }
-              },
-              icon: const Icon(
-                Icons.calendar_today,
-              ),
-              // TODO: add button to reset data for a particular day somewhere
-            )
-          ],
-        ),
-        drawer: const STSDrawer(),
-        body: Column(children: [
-          // Padding(
-          //   padding: const EdgeInsets.all(8.0),
-          //   child: Row(
-          //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-          //     children: [
-          //       Text(
-          //         ,
-          //         style: const TextStyle(fontWeight: FontWeight.bold),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-          intervals.when(
-            data: (combinedIntervals) {
-              num totalConsumption = combinedIntervals.totalConsumption;
-              num totalGrid = combinedIntervals.totalGrid;
-              num totalProduction = combinedIntervals.totalProduction;
-              num totalSurplus = combinedIntervals.totalSurplus;
-              num totalNet = combinedIntervals.totalNet;
-              num totalCost = combinedIntervals.totalCost;
-              return Expanded(
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      // crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              NumberCard(
-                                title: 'Surplus',
-                                value: totalSurplus,
-                                valueColor: Colors.green.shade500,
-                                valueUnits: 'kWh',
-                              ),
-                              NumberCard(
-                                title: 'Production',
-                                value: totalProduction,
-                                valueColor: Colors.green.shade500,
-                                valueUnits: 'kWh',
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              NumberCard(
-                                title: 'Grid Cons.',
-                                value: totalGrid,
-                                valueColor: Colors.red.shade900,
-                                valueUnits: 'kWh',
-                              ),
-                              NumberCard(
-                                title: 'Consumption',
-                                value: totalConsumption,
-                                valueColor: Colors.red.shade900,
-                                valueUnits: 'kWh',
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: NumberCard(
-                            title: 'Net',
-                            value: totalNet,
-                            valueColor: totalNet >= 0
-                                ? Colors.green.shade500
-                                : Colors.red.shade900,
-                            valueUnits: 'kWh',
-                          ),
-                        ),
-                      ],
-                    ),
-                    Expanded(
-                        flex: 3,
-                        child: IntervalsChart(
-                          intervalsData: combinedIntervals.intervalsList,
-                        ))
-                  ],
+      appBar: AppBar(
+        title: Text(
+            'Energy Data: ${getSelectedDateText(selectedDates.startDate, selectedDates.endDate)}'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              DateTimeRange? range = await showDateRangePicker(
+                context: context,
+                firstDate: DateTime(2010),
+                lastDate: DateTime.now().subtract(const Duration(days: 2)),
+                initialDateRange: DateTimeRange(
+                  start: selectedDates.startDate,
+                  end: selectedDates.endDate,
                 ),
               );
+              if (range != null) {
+                selectedDates.updateDates(
+                  start: range.start,
+                  end: range.end,
+                );
+              }
             },
-            error: (e, s) => Text('$e with stack $s '),
-            loading: () => const Text('loading'),
-          ),
-        ]));
+            icon: const Icon(
+              Icons.calendar_today,
+            ),
+            // TODO: add button to reset data for a particular day somewhere
+          )
+        ],
+      ),
+      drawer: const STSDrawer(),
+      body: intervals.when(
+        data: (combinedIntervals) {
+          return IntervalsChart(
+            combinedIntervalsData: combinedIntervals,
+          );
+        },
+        error: (e, s) => Text('$e with stack $s '),
+        loading: () => const Text('loading'),
+      ),
+    );
   }
 }

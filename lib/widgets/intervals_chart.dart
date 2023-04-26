@@ -1,3 +1,6 @@
+import 'package:smart_texas_solar/constants.dart';
+import 'package:smart_texas_solar/providers/combined_intervals_data_provider.dart';
+import 'package:smart_texas_solar/widgets/energy_stats_card.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -14,9 +17,17 @@ const TextStyle kTooltipTitleStyle = TextStyle(
 );
 const TextStyle kTooltipTextStyle = TextStyle(color: Colors.black);
 
+enum SeriesType {
+  totalProduction,
+  surplusProduction,
+  totalConsumption,
+  gridConsumption,
+  cost,
+}
+
 class IntervalsChart extends StatefulWidget {
-  final List<CombinedInterval> intervalsData;
-  const IntervalsChart({super.key, required this.intervalsData});
+  final CombinedIntervalsData combinedIntervalsData;
+  const IntervalsChart({super.key, required this.combinedIntervalsData});
 
   @override
   State<IntervalsChart> createState() => _IntervalsChartState();
@@ -24,6 +35,13 @@ class IntervalsChart extends StatefulWidget {
 
 class _IntervalsChartState extends State<IntervalsChart> {
   late TooltipBehavior _tooltipBehavior;
+  Map<SeriesType, bool> seriesVisibilityState = {
+    SeriesType.totalProduction: true,
+    SeriesType.surplusProduction: true,
+    SeriesType.totalConsumption: true,
+    SeriesType.gridConsumption: true,
+    SeriesType.cost: true,
+  };
 
   @override
   void initState() {
@@ -85,82 +103,123 @@ class _IntervalsChartState extends State<IntervalsChart> {
     super.initState();
   }
 
+  toggleSeriesVisibility(SeriesType type) {
+    setState(() {
+      seriesVisibilityState[type] = !seriesVisibilityState[type]!;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SfCartesianChart(
-      legend: Legend(
-        isVisible: true,
-        itemPadding: 20,
-        iconHeight: 20,
-        iconWidth: 20,
-        overflowMode: LegendItemOverflowMode.wrap,
-      ),
-      primaryXAxis: DateTimeAxis(),
-      primaryYAxis: NumericAxis(title: AxisTitle(text: 'kWh')),
-      zoomPanBehavior: ZoomPanBehavior(
-        enablePinching: true,
-        enablePanning: true,
-        zoomMode: ZoomMode.x,
-      ),
-      axes: [
-        NumericAxis(
-            name: 'yAxis2',
-            labelFormat: '\${value}',
-            decimalPlaces: 4,
-            opposedPosition: true,
-            majorGridLines:
-                const MajorGridLines(color: Color.fromARGB(255, 0, 38, 70)))
-      ],
-      tooltipBehavior: _tooltipBehavior,
-      series: <ChartSeries>[
-        AreaSeries<CombinedInterval, DateTime>(
-          name: 'Production',
-          dataSource: widget.intervalsData,
-          xValueMapper: (data, _) => data.startTime,
-          yValueMapper: (data, _) => data.kwhSolarProduction,
-          color: Colors.green.shade300,
-          enableTooltip: true,
-        ),
-        AreaSeries<CombinedInterval, DateTime>(
-          name: 'Surplus',
-          dataSource: widget.intervalsData,
-          xValueMapper: (data, _) => data.startTime,
-          yValueMapper: (data, _) => data.kwhSurplusGeneration,
-          color: Colors.green.shade500,
-          enableTooltip: true,
-        ),
-        AreaSeries<CombinedInterval, DateTime>(
-          name: 'Consumption Total',
-          dataSource: widget.intervalsData,
-          xValueMapper: (data, _) => data.startTime,
-          yValueMapper: (data, _) => data.kwhTotalConsumption,
-          color: Colors.red.shade300,
-          opacity: 0.6,
-          enableTooltip: true,
-          animationDelay: 500,
-        ),
-        AreaSeries<CombinedInterval, DateTime>(
-          name: 'Consumption Grid',
-          dataSource: widget.intervalsData,
-          xValueMapper: (data, _) => data.startTime,
-          yValueMapper: (data, _) => data.kwhGridConsumption,
-          color: Colors.red.shade500,
-          opacity: 0.4,
-          enableTooltip: true,
-          animationDelay: 500,
-        ),
-        LineSeries<CombinedInterval, DateTime>(
-          name: 'Cost',
-          dataSource: widget.intervalsData,
-          xValueMapper: (data, _) => data.startTime,
-          yValueMapper: (data, _) => data.cost,
-          color: Colors.blue.shade800,
-          enableTooltip: true,
-          yAxisName: 'yAxis2',
-          width: .75,
-          animationDelay: 1000,
-        ),
-      ],
+    return OrientationBuilder(
+      builder: (context, orientation) => Flex(
+          direction: orientation == Orientation.portrait
+              ? Axis.vertical
+              : Axis.horizontal,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            EnergyStatsCard(
+              data: widget.combinedIntervalsData,
+              toggleSeries: toggleSeriesVisibility,
+              seriesVisibilityState: seriesVisibilityState,
+            ),
+            Expanded(
+              child: SfCartesianChart(
+                // legend: Legend(
+                //   isVisible: true,
+                //   itemPadding: 20,
+                //   iconHeight: 20,
+                //   iconWidth: 20,
+                //   width: '100%',
+                //   // overflowMode: LegendItemOverflowMode.wrap,
+                //   // position: LegendPosition.left,
+                //   orientation: LegendItemOrientation.vertical,
+                //   legendItemBuilder: (legendText, series, point, seriesIndex) =>
+                //       Row(mainAxisSize: MainAxisSize.max, children: [
+                //     Text('First'),
+                //     Text('Second'),
+                //     Text('Thrid'),
+                //   ]),
+                // ),
+                primaryXAxis: DateTimeAxis(),
+                primaryYAxis: NumericAxis(title: AxisTitle(text: 'kWh')),
+                zoomPanBehavior: ZoomPanBehavior(
+                  enablePinching: true,
+                  enablePanning: true,
+                  zoomMode: ZoomMode.x,
+                ),
+                axes: [
+                  NumericAxis(
+                      name: 'yAxis2',
+                      labelFormat: '\${value}',
+                      decimalPlaces: 4,
+                      opposedPosition: true,
+                      majorGridLines: const MajorGridLines(
+                          color: Color.fromARGB(255, 0, 38, 70)))
+                ],
+                tooltipBehavior: _tooltipBehavior,
+                series: <ChartSeries>[
+                  AreaSeries<CombinedInterval, DateTime>(
+                    name: 'Total Production',
+                    dataSource: widget.combinedIntervalsData.intervalsList,
+                    xValueMapper: (data, _) => data.startTime,
+                    yValueMapper: (data, _) => data.kwhSolarProduction,
+                    color: kTotalProductionColor,
+                    enableTooltip: true,
+                    isVisible:
+                        seriesVisibilityState[SeriesType.totalProduction],
+                  ),
+                  AreaSeries<CombinedInterval, DateTime>(
+                    name: 'Surplus Production',
+                    dataSource: widget.combinedIntervalsData.intervalsList,
+                    xValueMapper: (data, _) => data.startTime,
+                    yValueMapper: (data, _) => data.kwhSurplusGeneration,
+                    color: kSurplusProductionColor,
+                    enableTooltip: true,
+                    isVisible:
+                        seriesVisibilityState[SeriesType.surplusProduction],
+                  ),
+                  AreaSeries<CombinedInterval, DateTime>(
+                    name: 'Total Consumption',
+                    dataSource: widget.combinedIntervalsData.intervalsList,
+                    xValueMapper: (data, _) => data.startTime,
+                    yValueMapper: (data, _) => data.kwhTotalConsumption,
+                    color: kTotalConsumptionColor,
+                    opacity: 0.6,
+                    enableTooltip: true,
+                    animationDelay: 500,
+                    isVisible:
+                        seriesVisibilityState[SeriesType.totalConsumption],
+                  ),
+                  AreaSeries<CombinedInterval, DateTime>(
+                    name: 'Grid Consumption',
+                    dataSource: widget.combinedIntervalsData.intervalsList,
+                    xValueMapper: (data, _) => data.startTime,
+                    yValueMapper: (data, _) => data.kwhGridConsumption,
+                    color: kGridConsumptionColor,
+                    opacity: 0.4,
+                    enableTooltip: true,
+                    animationDelay: 500,
+                    isVisible:
+                        seriesVisibilityState[SeriesType.gridConsumption],
+                  ),
+                  LineSeries<CombinedInterval, DateTime>(
+                    name: 'Cost',
+                    dataSource: widget.combinedIntervalsData.intervalsList,
+                    xValueMapper: (data, _) => data.startTime,
+                    yValueMapper: (data, _) => data.cost,
+                    color: kCostColor,
+                    enableTooltip: true,
+                    yAxisName: 'yAxis2',
+                    width: .75,
+                    animationDelay: 1000,
+                    isVisible: seriesVisibilityState[SeriesType.cost],
+                  ),
+                ],
+              ),
+            ),
+          ]),
     );
   }
 }
