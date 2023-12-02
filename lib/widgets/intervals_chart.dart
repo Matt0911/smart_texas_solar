@@ -5,6 +5,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_texas_solar/models/combined_interval.dart';
+import 'dart:math';
 
 final _formatter = DateFormat('h:mm');
 final _formatterEnd = DateFormat('h:mm a');
@@ -184,7 +185,7 @@ class _IntervalsChartState extends State<IntervalsChart> {
                     name: 'Total Consumption',
                     dataSource: widget.combinedIntervalsData.intervalsList,
                     xValueMapper: (data, _) => data.startTime,
-                    yValueMapper: (data, _) => data.kwhTotalConsumption,
+                    yValueMapper: (data, _) => max(data.kwhTotalConsumption, 0),
                     color: kTotalConsumptionColor,
                     opacity: 0.6,
                     enableTooltip: true,

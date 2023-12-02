@@ -261,4 +261,20 @@ class EnergyPlan extends HiveObject {
     // }
     // return '$name ending ${_formatter.format(endDate!)}';
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'startDate': startDate?.toUtc().toIso8601String(),
+      'endDate': endDate?.toUtc().toIso8601String(),
+      'connectionFee': connectionFee,
+      'deliveryCharge': deliveryCharge,
+      'kwhCharge': kwhCharge,
+      'baseCharge': baseCharge,
+      'solarBuybackRate': solarBuybackRate,
+      'customVars': customVars.map((e) => e.toMap()).toList(),
+      'name': name,
+      'customEquation': customEquation,
+      'usesCustomEq': usesCustomEq,
+    };
+  }
 }

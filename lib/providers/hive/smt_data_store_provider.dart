@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -119,5 +121,20 @@ class SMTDataStore {
 
   removeCookies() {
     _coreBox.delete(cookiesKey);
+  }
+
+  Map<String, dynamic> exportData() {
+    Map<String, dynamic> data = {
+      'smt': {
+        'intervals': _intervalsBox
+            .toMap()
+            .map((key, value) => MapEntry(key, value.toMap())),
+        'billingData': _billingDataBox
+            .toMap()
+            .map((key, value) => MapEntry(key.toString(), value.toMap())),
+      }
+    };
+    print(json.encode(data));
+    return data;
   }
 }

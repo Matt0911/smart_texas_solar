@@ -7,6 +7,7 @@ import 'package:smart_texas_solar/models/billing_data.dart';
 import 'package:smart_texas_solar/models/energy_plan.dart';
 import 'package:smart_texas_solar/models/energy_plan_custom_var.dart';
 import 'package:smart_texas_solar/models/enphase_system.dart';
+import 'package:smart_texas_solar/screens/data_export_screen.dart';
 import 'package:smart_texas_solar/screens/energy_bill_history_screen.dart';
 import 'package:smart_texas_solar/screens/energy_bill_selection_screen.dart';
 import 'package:smart_texas_solar/screens/energy_data_screen.dart';
@@ -68,6 +69,7 @@ class MyApp extends StatelessWidget {
             const EnergyBillSelectionScreen(),
         EnergyPlanCostEstimateScreen.routeName: (context) =>
             const EnergyPlanCostEstimateScreen(),
+        DataExportScreen.routeName: (context) => const DataExportScreen(),
       },
     );
   }

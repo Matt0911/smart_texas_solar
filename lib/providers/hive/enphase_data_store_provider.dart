@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:smart_texas_solar/models/enphase_system.dart';
@@ -63,5 +65,19 @@ class EnphaseDataStore {
   EnphaseSystem? getSystemInfo() => _coreBox.get(systemInfoKey);
   storeSystemInfo(EnphaseSystem systemInfo) {
     _coreBox.put(systemInfoKey, systemInfo);
+  }
+
+  Map<String, dynamic> exportData() {
+    Map<String, dynamic> data = {
+      'enpahse': {
+        'intervals': _intervalsBox
+            .toMap()
+            .map((key, value) => MapEntry(key, value.toMap())),
+        'system':
+            _coreBox.toMap().map((key, value) => MapEntry(key, value.toMap())),
+      }
+    };
+    print(json.encode(data));
+    return data;
   }
 }

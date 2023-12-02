@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_texas_solar/screens/data_export_screen.dart';
 import 'package:smart_texas_solar/screens/energy_bill_history_screen.dart';
 import 'package:smart_texas_solar/screens/energy_bill_selection_screen.dart';
 import 'package:smart_texas_solar/screens/energy_data_screen.dart';
@@ -57,6 +58,17 @@ class STSDrawer extends StatelessWidget {
                 : () => Navigator.pushNamed(
                       context,
                       EnergyBillSelectionScreen.routeName,
+                    ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.save),
+            title: const Text('Export Data'),
+            selected: DataExportScreen.routeName == currentRoute,
+            onTap: DataExportScreen.routeName == currentRoute
+                ? () => Navigator.pop(context)
+                : () => Navigator.pushNamed(
+                      context,
+                      DataExportScreen.routeName,
                     ),
           ),
         ],

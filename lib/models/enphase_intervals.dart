@@ -85,4 +85,10 @@ class EnphaseIntervals {
 
     return data;
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'generationData': generationData.map((i) => i.toMap()).toList(),
+    };
+  }
 }

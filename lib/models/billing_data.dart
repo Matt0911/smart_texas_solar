@@ -63,4 +63,14 @@ class BillingData extends HiveObject {
   String toString() {
     return getBillDateRange(startDate, endDate);
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'startDate': startDate.toUtc().toIso8601String(),
+      'endDate': endDate.toUtc().toIso8601String(),
+      'kwh': kwh,
+      'lastUpdate': lastUpdate.toUtc().toIso8601String(),
+      'actualBilledAmount': actualBilledAmount,
+    };
+  }
 }

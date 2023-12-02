@@ -23,4 +23,11 @@ class Interval {
   String toString() {
     return '$endTime - khw: $kwh';
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'endTime': endTime.toUtc().toIso8601String(),
+      'kwh': kwh,
+    };
+  }
 }

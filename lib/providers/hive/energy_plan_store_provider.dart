@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:smart_texas_solar/models/energy_plan.dart';
@@ -66,5 +68,17 @@ class EnergyPlanStore {
   Future<List<EnergyPlan>> addEnergyPlan(EnergyPlan plan) async {
     await _box.add(plan);
     return getStoredEnergyPlans()!;
+  }
+
+  Map<String, dynamic> exportData() {
+    Map<String, dynamic> data = {
+      'energyPlans': {
+        'plans': _box
+            .toMap()
+            .map((key, value) => MapEntry(key.toString(), value.toMap())),
+      }
+    };
+    print(json.encode(data));
+    return data;
   }
 }

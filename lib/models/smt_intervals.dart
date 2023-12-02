@@ -106,4 +106,11 @@ class SMTIntervals {
 
     return data;
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'consumptionData': consumptionData.map((i) => i.toMap()).toList(),
+      'surplusData': surplusData.map((i) => i.toMap()).toList(),
+    };
+  }
 }

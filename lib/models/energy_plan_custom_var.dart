@@ -19,4 +19,13 @@ class EnergyPlanCustomVar {
     this.symbol = '',
     this.includeInPartial = true,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'value': value,
+      'symbol': symbol,
+      'includeInPartial': includeInPartial,
+    };
+  }
 }

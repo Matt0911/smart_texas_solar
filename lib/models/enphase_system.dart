@@ -34,4 +34,15 @@ class EnphaseSystem {
         systemSize = enphaseSystemData['system_size'],
         operationalAtTime = DateTime.fromMillisecondsSinceEpoch(
             enphaseSystemData['operational_at'] * 1000);
+
+  Map<String, dynamic> toMap() {
+    return {
+      'systemId': systemId,
+      'name': name,
+      'publicName': publicName,
+      'timezone': timezone,
+      'systemSize': systemSize,
+      'operationalAtTime': operationalAtTime.toUtc().toIso8601String(),
+    };
+  }
 }
