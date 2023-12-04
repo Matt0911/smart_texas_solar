@@ -128,13 +128,34 @@ class SMTDataStore {
       'smt': {
         'intervals': _intervalsBox
             .toMap()
-            .map((key, value) => MapEntry(key, value.toMap())),
+            .map((key, value) => MapEntry(key, value.exportJson())),
         'billingData': _billingDataBox
             .toMap()
-            .map((key, value) => MapEntry(key.toString(), value.toMap())),
+            .map((key, value) => MapEntry(key.toString(), value.exportJson())),
       }
     };
     print(json.encode(data));
     return data;
+  }
+
+  bool importData(Map<String, dynamic> data) {
+    try {
+      Map<String, SMTIntervals> intervals = {};
+      data['smt']['intervals'].forEach((key, value) {
+        intervals.putIfAbsent(key, () => SMTIntervals.import(value));
+      });
+      List<BillingData> billingData = [];
+      data['smt']['billingData'].forEach((key, value) {
+        billingData.add(BillingData.import(value));
+      });
+
+      intervals.forEach((key, value) {
+        _intervalsBox.put(key, value);
+      });
+      addBillingData(billingData);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

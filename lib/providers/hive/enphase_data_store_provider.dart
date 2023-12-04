@@ -69,15 +69,41 @@ class EnphaseDataStore {
 
   Map<String, dynamic> exportData() {
     Map<String, dynamic> data = {
-      'enpahse': {
+      'enphase': {
         'intervals': _intervalsBox
             .toMap()
-            .map((key, value) => MapEntry(key, value.toMap())),
+            .map((key, value) => MapEntry(key, value.exportJson())),
         'system':
             _coreBox.toMap().map((key, value) => MapEntry(key, value.toMap())),
       }
     };
     print(json.encode(data));
     return data;
+  }
+
+  bool importData(Map<String, dynamic> data) {
+    try {
+      Map<String, EnphaseIntervals> intervals = {};
+      data['enphase']['intervals'].forEach((key, value) {
+        intervals.putIfAbsent(key, () => EnphaseIntervals.import(value));
+      });
+      Map<String, dynamic> coreData = {};
+      data['enphase']['system'].forEach((key, value) {
+        if (key == systemInfoKey) {
+          coreData.putIfAbsent(key, () => EnphaseSystem.import(value));
+        }
+        coreData.putIfAbsent(key, () => value);
+      });
+
+      intervals.forEach((key, value) {
+        _intervalsBox.put(key, value);
+      });
+      coreData.forEach((key, value) {
+        _coreBox.put(key, value);
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

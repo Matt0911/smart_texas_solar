@@ -20,7 +20,7 @@ class EnergyPlanCustomVar {
     this.includeInPartial = true,
   });
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> exportJson() {
     return {
       'name': name,
       'value': value,
@@ -28,4 +28,10 @@ class EnergyPlanCustomVar {
       'includeInPartial': includeInPartial,
     };
   }
+
+  EnergyPlanCustomVar.import(Map data)
+      : name = data['name'],
+        value = data['value'],
+        symbol = data['symbol'],
+        includeInPartial = data['includeInPartial'];
 }

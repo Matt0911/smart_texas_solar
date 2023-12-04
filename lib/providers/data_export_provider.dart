@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -14,7 +15,24 @@ final dataExportProvider = FutureProvider.autoDispose((ref) async {
   var enphaseDataStore = await ref.watch(enphaseDataStoreProvider.future);
   var energyPlanStore = await ref.watch(energyPlanStoreProvider.future);
 
-  exportData() async {
+  return DataUtilities(
+      smtDataStore: smtDataStore,
+      enphaseDataStore: enphaseDataStore,
+      energyPlanStore: energyPlanStore);
+});
+
+class DataUtilities {
+  SMTDataStore smtDataStore;
+  EnphaseDataStore enphaseDataStore;
+  EnergyPlanStore energyPlanStore;
+
+  DataUtilities({
+    required this.smtDataStore,
+    required this.enphaseDataStore,
+    required this.energyPlanStore,
+  });
+
+  Future<bool> exportData() async {
     try {
       var smtData = smtDataStore.exportData();
       var enphaseData = enphaseDataStore.exportData();
@@ -44,5 +62,27 @@ final dataExportProvider = FutureProvider.autoDispose((ref) async {
     }
   }
 
-  return exportData;
-});
+  Future<bool> importData() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+      if (result != null) {
+        File file = File(result.files.single.path!);
+        var dataStr = await file.readAsString();
+        Map<String, dynamic> data = json.decode(dataStr);
+
+        // pass data to each store
+        smtDataStore.importData(data);
+        enphaseDataStore.importData(data);
+        energyPlanStore.importData(data);
+
+        return true;
+      } else {
+        // User canceled the picker
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+}

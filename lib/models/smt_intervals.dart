@@ -107,10 +107,21 @@ class SMTIntervals {
     return data;
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> exportJson() {
     return {
-      'consumptionData': consumptionData.map((i) => i.toMap()).toList(),
-      'surplusData': surplusData.map((i) => i.toMap()).toList(),
+      'consumptionData': consumptionData.map((i) => i.exportJson()).toList(),
+      'surplusData': surplusData.map((i) => i.exportJson()).toList(),
     };
+  }
+
+  SMTIntervals.import(Map data)
+      : consumptionData = data['consumptionData']
+            .map<Interval>((d) => Interval.import(d))
+            .toList(),
+        surplusData = data['surplusData']
+            .map<Interval>((d) => Interval.import(d))
+            .toList() {
+    consumptionMap = IntervalMap(consumptionData);
+    surplusMap = IntervalMap(surplusData);
   }
 }

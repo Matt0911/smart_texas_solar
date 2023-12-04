@@ -75,10 +75,26 @@ class EnergyPlanStore {
       'energyPlans': {
         'plans': _box
             .toMap()
-            .map((key, value) => MapEntry(key.toString(), value.toMap())),
+            .map((key, value) => MapEntry(key.toString(), value.exportJson())),
       }
     };
     print(json.encode(data));
     return data;
+  }
+
+  bool importData(Map<String, dynamic> data) {
+    try {
+      List<EnergyPlan> billingData = [];
+      data['energyPlans']['plans'].forEach((key, value) {
+        billingData.add(EnergyPlan.import(value));
+      });
+
+      for (var element in billingData) {
+        _box.add(element);
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

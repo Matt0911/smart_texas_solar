@@ -262,7 +262,7 @@ class EnergyPlan extends HiveObject {
     // return '$name ending ${_formatter.format(endDate!)}';
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> exportJson() {
     return {
       'startDate': startDate?.toUtc().toIso8601String(),
       'endDate': endDate?.toUtc().toIso8601String(),
@@ -271,10 +271,30 @@ class EnergyPlan extends HiveObject {
       'kwhCharge': kwhCharge,
       'baseCharge': baseCharge,
       'solarBuybackRate': solarBuybackRate,
-      'customVars': customVars.map((e) => e.toMap()).toList(),
+      'customVars': customVars.map((e) => e.exportJson()).toList(),
       'name': name,
       'customEquation': customEquation,
       'usesCustomEq': usesCustomEq,
     };
   }
+
+  EnergyPlan.import(Map data)
+      : startDate = data['startDate'] == null
+            ? null
+            : DateTime.parse(data['startDate']).toLocal(),
+        endDate = data['endDate'] == null
+            ? null
+            : DateTime.parse(data['endDate']).toLocal(),
+        connectionFee = data['connectionFee'],
+        deliveryCharge = data['deliveryCharge'],
+        kwhCharge = data['kwhCharge'],
+        baseCharge = data['baseCharge'],
+        solarBuybackRate = data['solarBuybackRate'],
+        customVars = data['customVars']
+            .map<EnergyPlanCustomVar>(
+                (element) => EnergyPlanCustomVar.import(element))
+            .toList(),
+        name = data['name'],
+        customEquation = data['customEquation'],
+        usesCustomEq = data['usesCustomEq'];
 }

@@ -24,10 +24,14 @@ class Interval {
     return '$endTime - khw: $kwh';
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> exportJson() {
     return {
       'endTime': endTime.toUtc().toIso8601String(),
       'kwh': kwh,
     };
   }
+
+  Interval.import(Map data)
+      : endTime = DateTime.parse(data['endTime']).toLocal(),
+        kwh = data['kwh'];
 }

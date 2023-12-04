@@ -35,7 +35,7 @@ class EnphaseSystem {
         operationalAtTime = DateTime.fromMillisecondsSinceEpoch(
             enphaseSystemData['operational_at'] * 1000);
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> exportJson() {
     return {
       'systemId': systemId,
       'name': name,
@@ -45,4 +45,12 @@ class EnphaseSystem {
       'operationalAtTime': operationalAtTime.toUtc().toIso8601String(),
     };
   }
+
+  EnphaseSystem.import(Map data)
+      : systemId = data['systemId'],
+        name = data['name'],
+        publicName = data['publicName'],
+        timezone = data['timezone'],
+        systemSize = data['systemSize'],
+        operationalAtTime = DateTime.parse(data['operationalAtTime']).toLocal();
 }

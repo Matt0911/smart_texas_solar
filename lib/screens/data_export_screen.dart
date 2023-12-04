@@ -18,18 +18,30 @@ class DataExportScreen extends ConsumerWidget {
       ),
       drawer: const STSDrawer(),
       body: dataExporter.when(
-        data: (exportData) {
+        data: (dataUtilities) {
           return Container(
-            alignment: Alignment.center,
-            child: ElevatedButton.icon(
-              onPressed: exportData, // TODO: react to result
-              icon: const Icon(Icons.save),
-              label: const Text('Export'),
+            width: double.infinity,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: dataUtilities.exportData, // TODO: react to result
+                  icon: const Icon(Icons.save),
+                  label: const Text('Export'),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: dataUtilities.importData, // TODO: react to result
+                  icon: const Icon(Icons.upload),
+                  label: const Text('Import'),
+                )
+              ],
             ),
           );
         },
         error: (e, s) => Text('$e with stack $s '),
-        loading: () => const Text('loading'),
+        loading: () => const Text('Getting things ready for export/import'),
       ),
     );
   }

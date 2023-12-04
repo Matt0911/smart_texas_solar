@@ -86,9 +86,16 @@ class EnphaseIntervals {
     return data;
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> exportJson() {
     return {
-      'generationData': generationData.map((i) => i.toMap()).toList(),
+      'generationData': generationData.map((i) => i.exportJson()).toList(),
     };
+  }
+
+  EnphaseIntervals.import(Map data)
+      : generationData = data['generationData']
+            .map<Interval>((d) => Interval.import(d))
+            .toList() {
+    generationMap = IntervalMap(generationData);
   }
 }

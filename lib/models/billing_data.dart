@@ -64,7 +64,7 @@ class BillingData extends HiveObject {
     return getBillDateRange(startDate, endDate);
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> exportJson() {
     return {
       'startDate': startDate.toUtc().toIso8601String(),
       'endDate': endDate.toUtc().toIso8601String(),
@@ -73,4 +73,11 @@ class BillingData extends HiveObject {
       'actualBilledAmount': actualBilledAmount,
     };
   }
+
+  BillingData.import(Map data)
+      : startDate = DateTime.parse(data['startDate']).toLocal(),
+        endDate = DateTime.parse(data['endDate']).toLocal(),
+        kwh = data['kwh'],
+        lastUpdate = DateTime.parse(data['lastUpdate']).toLocal(),
+        actualBilledAmount = data['actualBilledAmount'];
 }
