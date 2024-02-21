@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:smart_texas_solar/secret_vals.dart' as secrets;
 
 part 'enphase_refresh_token_provider.g.dart';
 

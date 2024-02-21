@@ -7,7 +7,6 @@ import 'package:smart_texas_solar/providers/smt/billing_data_provider.dart';
 import 'package:smart_texas_solar/screens/energy_plan_cost_estimate_screen.dart';
 import 'package:smart_texas_solar/util/date_util.dart';
 import 'package:smart_texas_solar/widgets/sts_drawer.dart';
-import 'package:collection/collection.dart';
 
 import '../models/energy_plan.dart';
 import '../models/interval.dart' as sts_interval;

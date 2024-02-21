@@ -1,4 +1,3 @@
-import 'package:smart_texas_solar/models/interval_map.dart';
 
 class CombinedInterval {
   DateTime endTime;

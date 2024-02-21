@@ -114,7 +114,7 @@ class EnergyPlansScreenState extends ConsumerState<EnergyPlansScreen> {
                 SingleChildScrollView(
                   child: ExpansionPanelList(
                     expansionCallback: (panelIndex, isExpanded) => setState(() {
-                      data[panelIndex].isExpanded = !isExpanded;
+                      data[panelIndex].isExpanded = isExpanded;
                     }),
                     children: data
                         .map(

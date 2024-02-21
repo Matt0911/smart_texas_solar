@@ -19,7 +19,7 @@ class DataExportScreen extends ConsumerWidget {
       drawer: const STSDrawer(),
       body: dataExporter.when(
         data: (dataUtilities) {
-          return Container(
+          return SizedBox(
             width: double.infinity,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

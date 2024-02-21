@@ -19,7 +19,7 @@ class _EnphaseAuthCodeWebviewState extends State<EnphaseAuthCodeWebview> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 400,
       child: WebView(
         initialUrl:

@@ -49,6 +49,8 @@ dependencies:
   share_plus: ^7.2.1
   file_picker: ^5.3.1
 
+  path_provider: any
+  collection: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

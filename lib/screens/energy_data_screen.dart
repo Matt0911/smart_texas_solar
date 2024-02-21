@@ -7,7 +7,6 @@ import 'package:smart_texas_solar/widgets/sts_drawer.dart';
 import '../providers/combined_intervals_data_provider.dart';
 import '../providers/selected_dates_provider.dart';
 import '../widgets/intervals_chart.dart';
-import '../widgets/number_card.dart';
 
 final _formatter = DateFormat('MMM dd, yyyy');
 final _formatterNoYear = DateFormat('MMM dd');

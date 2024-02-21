@@ -263,7 +263,7 @@ class EnergyPlanCostEstimateListState
                     child: ExpansionPanelList(
                       expansionCallback: (panelIndex, isExpanded) =>
                           setState(() {
-                        data[panelIndex].isExpanded = !isExpanded;
+                        data[panelIndex].isExpanded = isExpanded;
                       }),
                       // TODO: UI for consumption mod (toggle should modify, kwh delta, time select)
                       children: data

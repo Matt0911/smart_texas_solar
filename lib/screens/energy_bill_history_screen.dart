@@ -179,7 +179,7 @@ class EnergyBillHistoryScreenState
           ? SingleChildScrollView(
               child: ExpansionPanelList(
                 expansionCallback: (panelIndex, isExpanded) => setState(() {
-                  data![panelIndex].isExpanded = !isExpanded;
+                  data![panelIndex].isExpanded = isExpanded;
                 }),
                 children: data!
                     .map(
