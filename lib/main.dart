@@ -53,8 +53,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Smart Texas Solar',
       theme: ThemeData(
-        primarySwatch: Colors.green,
-        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.green, brightness: Brightness.dark),
       ),
       navigatorKey: navigatorKey,
       initialRoute: EnergyDataScreen.routeName,

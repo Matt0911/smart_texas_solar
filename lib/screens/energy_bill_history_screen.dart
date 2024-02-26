@@ -193,16 +193,11 @@ class EnergyBillHistoryScreenState
                         body: Column(
                           children: [
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 NumberCard(
                                   title: 'Billed Cons',
                                   value: bill.rawData.kwh,
-                                  valueColor: Colors.red.shade900,
-                                  valueUnits: 'kWh',
-                                ),
-                                NumberCard(
-                                  title: 'Grid Cons',
-                                  value: bill.totalGridConsumption,
                                   valueColor: Colors.red.shade900,
                                   valueUnits: 'kWh',
                                 ),

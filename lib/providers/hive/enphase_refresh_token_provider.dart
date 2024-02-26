@@ -4,7 +4,7 @@ import 'package:hive_flutter/adapters.dart';
 part 'enphase_refresh_token_provider.g.dart';
 
 final enphaseRefreshTokenProvider =
-    FutureProvider<EnpahseTokenStore>((_) => EnpahseTokenStore.create());
+    FutureProvider<EnphaseTokenStore>((_) => EnphaseTokenStore.create());
 
 const String boxName = 'enphaseTokenStore';
 
@@ -33,13 +33,13 @@ const String boxName = 'enphaseTokenStore';
 //   }
 // }
 
-class EnpahseTokenStore {
+class EnphaseTokenStore {
   late Box _tokensBox;
 
-  EnpahseTokenStore._create();
+  EnphaseTokenStore._create();
 
-  static Future<EnpahseTokenStore> create() async {
-    final component = EnpahseTokenStore._create();
+  static Future<EnphaseTokenStore> create() async {
+    final component = EnphaseTokenStore._create();
     await component._init();
     return component;
   }

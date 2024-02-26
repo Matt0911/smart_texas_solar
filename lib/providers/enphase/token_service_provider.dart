@@ -22,7 +22,7 @@ class EnphaseTokenService {
   static EnphaseTokenService? _service;
   static Future<EnphaseTokenResponse>? _currentFetch;
   final Future<HiveSecretsDB> _secretsDBFuture;
-  final Future<EnpahseTokenStore> _enphaseTokenStore;
+  final Future<EnphaseTokenStore> _enphaseTokenStore;
 
   factory EnphaseTokenService(secretsDBFuture, enphaseRefreshTokenService) {
     return _service ??=

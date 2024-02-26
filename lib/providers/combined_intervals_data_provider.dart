@@ -20,7 +20,7 @@ final combinedIntervalsDataProvider =
 
   return CombinedIntervalsData(
     smtData: smtIntervals,
-    enpahseData: enphaseIntervals,
+    enphaseData: enphaseIntervals,
     energyPlanStore: energyPlanStore,
   );
 });
@@ -42,16 +42,16 @@ int _getNumberOfIntervalsToCombine(int numDaysToDisplay) {
 }
 
 List<CombinedInterval> _combineEnphaseAndSMTData(
-  Map<DateTime, EnphaseIntervals> enpahseData,
+  Map<DateTime, EnphaseIntervals> enphaseData,
   Map<DateTime, SMTIntervals> smtData,
   EnergyPlanStore energyPlanStore,
 ) {
-  assert(enpahseData.length == smtData.length);
+  assert(enphaseData.length == smtData.length);
   List<CombinedInterval> intervalList = [];
-  int sliceSize = _getNumberOfIntervalsToCombine(enpahseData.length);
-  for (var day in enpahseData.keys) {
+  int sliceSize = _getNumberOfIntervalsToCombine(enphaseData.length);
+  for (var day in enphaseData.keys) {
     // TODO: handle combining days together
-    var production = enpahseData[day]!.generationMap;
+    var production = enphaseData[day]!.generationMap;
     var gridConsumption = smtData[day]!.consumptionMap;
     var surplusProduction = smtData[day]!.surplusMap;
 
@@ -136,9 +136,9 @@ class CombinedIntervalsData {
   }
 
   CombinedIntervalsData({
-    required Map<DateTime, EnphaseIntervals> enpahseData,
+    required Map<DateTime, EnphaseIntervals> enphaseData,
     required Map<DateTime, SMTIntervals> smtData,
     required EnergyPlanStore energyPlanStore,
   }) : intervalsList =
-            _combineEnphaseAndSMTData(enpahseData, smtData, energyPlanStore);
+            _combineEnphaseAndSMTData(enphaseData, smtData, energyPlanStore);
 }
