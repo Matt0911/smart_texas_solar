@@ -96,6 +96,7 @@ class EnergyPlansScreenState extends ConsumerState<EnergyPlansScreen> {
         title: const Text('Energy Plans'),
       ),
       drawer: const STSDrawer(),
+      // TODO: fix overflow issue, wont scroll
       body: arePlansLoaded && isHistoryLoaded
           ? Column(
               children: [

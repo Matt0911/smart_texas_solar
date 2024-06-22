@@ -75,27 +75,23 @@ class SMTDataStore {
 
   Future<List<BillingData>> addBillingData(
       List<BillingData> newBillingData) async {
+    Map<String, BillingData> newBillingDataMap = {};
+    for (var b in newBillingData) {
+      newBillingDataMap[b.startDateString] = b;
+    }
     var existingDataKeys = [..._billingDataBox.keys];
     if (existingDataKeys.isEmpty) {
-      await _billingDataBox.addAll(newBillingData);
+      await _billingDataBox.putAll(newBillingDataMap);
       return getStoredBillingData()!;
     }
-    for (var bill in newBillingData) {
-      var index = existingDataKeys.indexWhere((existingBillIndex) {
-        var existingBill =
-            _billingDataBox.get(existingDataKeys[existingBillIndex]);
-        return existingBill != null &&
-            existingBill.startDate.isAtSameMomentAs(bill.startDate) &&
-            existingBill.endDate.isAtSameMomentAs(bill.endDate);
-      });
-      if (index == -1) {
-        await _billingDataBox.add(bill);
-      } else {
-        var match = _billingDataBox.get(existingDataKeys[index]);
-        if (bill.lastUpdate.isAfter(match!.lastUpdate)) {
-          await _billingDataBox.put(existingDataKeys[index], bill);
+    for (var newBill in newBillingData) {
+      if (_billingDataBox.containsKey(newBill.startDateString)) {
+        var existingBill = _billingDataBox.get(newBill.startDateString)!;
+        if (!newBill.lastUpdate.isAfter(existingBill.lastUpdate)) {
+          continue;
         }
       }
+      await _billingDataBox.put(newBill.startDateString, newBill);
     }
 
     return getStoredBillingData()!;

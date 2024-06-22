@@ -66,7 +66,7 @@ class EnergyPlanStore {
   }
 
   Future<List<EnergyPlan>> addEnergyPlan(EnergyPlan plan) async {
-    await _box.add(plan);
+    await _box.put(plan.name, plan);
     return getStoredEnergyPlans()!;
   }
 
@@ -84,14 +84,10 @@ class EnergyPlanStore {
 
   bool importData(Map<String, dynamic> data) {
     try {
-      List<EnergyPlan> billingData = [];
       data['energyPlans']['plans'].forEach((key, value) {
-        billingData.add(EnergyPlan.import(value));
+        var plan = EnergyPlan.import(value);
+        _box.put(plan.name, plan);
       });
-
-      for (var element in billingData) {
-        _box.add(element);
-      }
       return true;
     } catch (e) {
       return false;

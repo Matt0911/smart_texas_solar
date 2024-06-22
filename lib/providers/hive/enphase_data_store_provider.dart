@@ -67,17 +67,31 @@ class EnphaseDataStore {
     _coreBox.put(systemInfoKey, systemInfo);
   }
 
+  exportIntervals() {
+    var intervalsMap = _intervalsBox.toMap();
+    var result = intervalsMap.map((key, value) {
+      return MapEntry(key, value.exportJson());
+    });
+    return result;
+  }
+
+  exportCore() {
+    var sysInfo = getSystemInfo();
+    if (sysInfo == null) {
+      return {};
+    }
+    return {
+      systemInfoKey: sysInfo.exportJson(),
+    };
+  }
+
   Map<String, dynamic> exportData() {
     Map<String, dynamic> data = {
       'enphase': {
-        'intervals': _intervalsBox
-            .toMap()
-            .map((key, value) => MapEntry(key, value.exportJson())),
-        'system':
-            _coreBox.toMap().map((key, value) => MapEntry(key, value.toMap())),
+        'intervals': exportIntervals(),
+        'system': exportCore(),
       }
     };
-    print(json.encode(data));
     return data;
   }
 

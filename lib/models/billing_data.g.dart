@@ -17,8 +17,8 @@ class BillingDataAdapter extends TypeAdapter<BillingData> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return BillingData(
-      fields[0] as DateTime,
-      fields[1] as DateTime,
+      fields[5] as String,
+      fields[6] as String,
       fields[2] as num,
       fields[3] as DateTime,
       fields[4] as num?,
@@ -29,16 +29,16 @@ class BillingDataAdapter extends TypeAdapter<BillingData> {
   void write(BinaryWriter writer, BillingData obj) {
     writer
       ..writeByte(5)
-      ..writeByte(0)
-      ..write(obj.startDate)
-      ..writeByte(1)
-      ..write(obj.endDate)
       ..writeByte(2)
       ..write(obj.kwh)
       ..writeByte(3)
       ..write(obj.lastUpdate)
       ..writeByte(4)
-      ..write(obj.actualBilledAmount);
+      ..write(obj.actualBilledAmount)
+      ..writeByte(5)
+      ..write(obj.startDateString)
+      ..writeByte(6)
+      ..write(obj.endDateString);
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_texas_solar/providers/data_export_provider.dart';
+import 'package:smart_texas_solar/widgets/async_button.dart';
 
 import '../widgets/sts_drawer.dart';
 
@@ -25,16 +26,16 @@ class DataExportScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                ElevatedButton.icon(
+                AsyncButton(
                   onPressed: dataUtilities.exportData, // TODO: react to result
-                  icon: const Icon(Icons.save),
-                  label: const Text('Export'),
+                  icon: Icons.save,
+                  label: 'Export',
                 ),
                 const SizedBox(height: 20),
-                ElevatedButton.icon(
+                AsyncButton(
                   onPressed: dataUtilities.importData, // TODO: react to result
-                  icon: const Icon(Icons.upload),
-                  label: const Text('Import'),
+                  icon: Icons.upload,
+                  label: 'Import',
                 )
               ],
             ),
