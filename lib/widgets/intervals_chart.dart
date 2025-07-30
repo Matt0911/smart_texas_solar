@@ -128,8 +128,8 @@ class _IntervalsChartState extends State<IntervalsChart> {
             Expanded(
               child: SfCartesianChart(
                 // legend: Legend(
-                //   isVisible: true,
-                //   itemPadding: 20,
+                //   initialIsVisible: true, true,
+                // itemPadding: 20,
                 //   iconHeight: 20,
                 //   iconWidth: 20,
                 //   width: '100%',
@@ -160,7 +160,7 @@ class _IntervalsChartState extends State<IntervalsChart> {
                           color: Color.fromARGB(255, 0, 38, 70)))
                 ],
                 tooltipBehavior: _tooltipBehavior,
-                series: <ChartSeries>[
+                series: <CartesianSeries>[
                   AreaSeries<CombinedInterval, DateTime>(
                     name: 'Total Production',
                     dataSource: widget.combinedIntervalsData.intervalsList,
@@ -168,8 +168,8 @@ class _IntervalsChartState extends State<IntervalsChart> {
                     yValueMapper: (data, _) => data.kwhSolarProduction,
                     color: kTotalProductionColor,
                     enableTooltip: true,
-                    isVisible:
-                        seriesVisibilityState[SeriesType.totalProduction],
+                    initialIsVisible: true,
+                    // seriesVisibilityState[SeriesType.totalProduction],
                   ),
                   AreaSeries<CombinedInterval, DateTime>(
                     name: 'Surplus Production',
@@ -178,8 +178,8 @@ class _IntervalsChartState extends State<IntervalsChart> {
                     yValueMapper: (data, _) => data.kwhSurplusGeneration,
                     color: kSurplusProductionColor,
                     enableTooltip: true,
-                    isVisible:
-                        seriesVisibilityState[SeriesType.surplusProduction],
+                    initialIsVisible: true,
+                    // seriesVisibilityState[SeriesType.surplusProduction],
                   ),
                   AreaSeries<CombinedInterval, DateTime>(
                     name: 'Total Consumption',
@@ -190,8 +190,8 @@ class _IntervalsChartState extends State<IntervalsChart> {
                     opacity: 0.6,
                     enableTooltip: true,
                     animationDelay: 500,
-                    isVisible:
-                        seriesVisibilityState[SeriesType.totalConsumption],
+                    initialIsVisible: true,
+                    // seriesVisibilityState[SeriesType.totalConsumption],
                   ),
                   AreaSeries<CombinedInterval, DateTime>(
                     name: 'Grid Consumption',
@@ -202,8 +202,8 @@ class _IntervalsChartState extends State<IntervalsChart> {
                     opacity: 0.4,
                     enableTooltip: true,
                     animationDelay: 500,
-                    isVisible:
-                        seriesVisibilityState[SeriesType.gridConsumption],
+                    initialIsVisible: true,
+                    // seriesVisibilityState[SeriesType.gridConsumption],
                   ),
                   LineSeries<CombinedInterval, DateTime>(
                     name: 'Cost',
@@ -215,8 +215,10 @@ class _IntervalsChartState extends State<IntervalsChart> {
                     yAxisName: 'yAxis2',
                     width: .75,
                     animationDelay: 1000,
-                    isVisible: seriesVisibilityState[SeriesType.cost],
+                    initialIsVisible: true,
+                    // seriesVisibilityState[SeriesType.cost],
                   ),
+                  // ),
                 ],
               ),
             ),

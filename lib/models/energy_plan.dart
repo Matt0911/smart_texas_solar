@@ -1,12 +1,10 @@
 import 'package:hive_flutter/adapters.dart';
-import 'package:intl/intl.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:smart_texas_solar/models/energy_plan_custom_var.dart';
 import 'package:smart_texas_solar/models/interval_map.dart';
 part 'energy_plan.g.dart';
 
-final DateFormat _formatter = DateFormat('MM/dd/yyyy');
-checkValidTimeRange(List<num> args) {
+double checkValidTimeRange(List<double> args) {
   String startTime = 't${args[0].toInt().toString().padLeft(4, '0')}';
   String endTime = 't${args[1].toInt().toString().padLeft(4, '0')}';
   try {
@@ -65,19 +63,19 @@ class EnergyPlan extends HiveObject {
   static Parser getParser() => Parser()
     ..addFunction(
       'if_gt',
-      (List<num> args) => args[0] > args[1] ? args[2] : args[3],
+      (List<double> args) => args[0] > args[1] ? args[2] : args[3],
     )
     ..addFunction(
       'if_gte',
-      (List<num> args) => args[0] >= args[1] ? args[2] : args[3],
+      (List<double> args) => args[0] >= args[1] ? args[2] : args[3],
     )
     ..addFunction(
       'if_lt',
-      (List<num> args) => args[0] < args[1] ? args[2] : args[3],
+      (List<double> args) => args[0] < args[1] ? args[2] : args[3],
     )
     ..addFunction(
       'if_lte',
-      (List<num> args) => args[0] <= args[1] ? args[2] : args[3],
+      (List<double> args) => args[0] <= args[1] ? args[2] : args[3],
     );
 
   EnergyPlan({
@@ -123,7 +121,7 @@ class EnergyPlan extends HiveObject {
               .indexWhere((element) => element.name == endTime);
           var desiredIntervalTimes =
               IntervalTime.values.sublist(startIndex, endIndex);
-          return desiredIntervalTimes.fold<num>(
+          return desiredIntervalTimes.fold<double>(
               0,
               (prev, time) =>
                   prev += consumptionByTime.intervals[time]?.kwh ?? 0);
@@ -139,7 +137,7 @@ class EnergyPlan extends HiveObject {
             ...IntervalTime.values.sublist(0, startIndex),
             ...IntervalTime.values.sublist(endIndex),
           ];
-          return desiredIntervalTimes.fold<num>(
+          return desiredIntervalTimes.fold<double>(
               0,
               (prev, time) =>
                   prev += consumptionByTime.intervals[time]?.kwh ?? 0);
@@ -183,7 +181,7 @@ class EnergyPlan extends HiveObject {
               .indexWhere((element) => element.name == endTime);
           var desiredIntervalTimes =
               IntervalTime.values.sublist(startIndex, endIndex);
-          return desiredIntervalTimes.fold<num>(
+          return desiredIntervalTimes.fold<double>(
               0,
               (prev, time) =>
                   prev += consumptionByTime.intervals[time]?.kwh ?? 0);
@@ -199,7 +197,7 @@ class EnergyPlan extends HiveObject {
             ...IntervalTime.values.sublist(0, startIndex),
             ...IntervalTime.values.sublist(endIndex),
           ];
-          return desiredIntervalTimes.fold<num>(
+          return desiredIntervalTimes.fold<double>(
               0,
               (prev, time) =>
                   prev += consumptionByTime.intervals[time]?.kwh ?? 0);

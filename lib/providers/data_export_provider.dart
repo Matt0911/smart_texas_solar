@@ -49,8 +49,8 @@ class DataUtilities {
           '${dir.path}/SmartTexasSolar-export-${dateFormatter.format(DateTime.now())}.json';
       var dataFile = await File(filename).writeAsString(json.encode(data));
 
-      final result =
-          await Share.shareXFiles([XFile(filename)], text: 'Data Export');
+      final result = await SharePlus.instance
+          .share(ShareParams(files: [XFile(filename)], text: 'Data Export'));
 
       if (result.status == ShareResultStatus.success) {
         dataFile.delete();

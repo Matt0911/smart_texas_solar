@@ -8,7 +8,7 @@ import 'package:smart_texas_solar/providers/hive/secrets_provider.dart';
 
 import '../hive/smt_data_store_provider.dart';
 
-final homeUrl = Uri.https('www.smartmetertexas.com', '/home');
+final homeUrl = WebUri('https://www.smartmetertexas.com/home');
 
 final smtTokenServiceProvider = FutureProvider<TokenService>((ref) async {
   var smtStore = await ref.watch(smtDataStoreProvider.future);
