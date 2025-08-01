@@ -9,11 +9,10 @@ class EnergyStatsCard extends StatelessWidget {
   final Map<SeriesType, bool> seriesVisibilityState;
 
   const EnergyStatsCard(
-      {Key? key,
+      {super.key,
       required this.data,
       required this.toggleSeries,
-      required this.seriesVisibilityState})
-      : super(key: key);
+      required this.seriesVisibilityState});
 
   @override
   Widget build(BuildContext context) {

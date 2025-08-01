@@ -104,7 +104,7 @@ class _IntervalsChartState extends State<IntervalsChart> {
     super.initState();
   }
 
-  toggleSeriesVisibility(SeriesType type) {
+  void toggleSeriesVisibility(SeriesType type) {
     setState(() {
       seriesVisibilityState[type] = !seriesVisibilityState[type]!;
     });

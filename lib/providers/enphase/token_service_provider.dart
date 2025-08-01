@@ -90,7 +90,7 @@ class EnphaseTokenService {
     return Future.error('error getting auth code');
   }
 
-  setTokens(EnphaseTokenResponse tokens) {
+  void setTokens(EnphaseTokenResponse tokens) {
     // TODO investigate null error
     _enphaseTokenStore.then((store) => store.storeTokens(tokens));
   }

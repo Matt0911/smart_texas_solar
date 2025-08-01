@@ -20,7 +20,7 @@ String getSelectedDateText(DateTime start, DateTime end) {
 class EnergyDataScreen extends ConsumerWidget {
   static const String routeName = '/energy-data-screen';
 
-  const EnergyDataScreen({Key? key}) : super(key: key);
+  const EnergyDataScreen({super.key});
 
   @override
   Widget build(context, ref) {

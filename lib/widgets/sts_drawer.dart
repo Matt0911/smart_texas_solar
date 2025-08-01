@@ -7,8 +7,8 @@ import 'package:smart_texas_solar/screens/energy_plans_screen.dart';
 
 class STSDrawer extends StatelessWidget {
   const STSDrawer({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(context) {

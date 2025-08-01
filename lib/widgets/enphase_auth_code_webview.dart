@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class EnphaseAuthCodeWebview extends StatefulWidget {
-  const EnphaseAuthCodeWebview({Key? key, required this.clientId})
-      : super(key: key);
+  const EnphaseAuthCodeWebview({super.key, required this.clientId});
 
   final String clientId;
 

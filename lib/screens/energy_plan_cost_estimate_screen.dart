@@ -285,7 +285,7 @@ class EnergyPlanCostEstimateListState
                               canTapOnHeader: true,
                               body: Column(
                                 children: [
-                                  ...plan.bills.map((e) => Text(e)).toList(),
+                                  ...plan.bills.map((e) => Text(e)),
                                   Text(
                                       'Total cost no solar: \$${plan.totalCostNoSolar.toStringAsFixed(2)}'),
                                   Row(

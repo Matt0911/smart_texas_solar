@@ -30,7 +30,7 @@ class SMTDataStore {
     return component;
   }
 
-  _init() async {
+  Future<void> _init() async {
     _coreBox = await Hive.openBox<String>(coreBoxName);
     _intervalsBox = await Hive.openBox<SMTIntervals>(intervalsBoxName);
     _billingDataBox = await Hive.openBox<BillingData>(billingBoxName);
@@ -40,11 +40,11 @@ class SMTDataStore {
 
   String _getKey(DateTime day) => '${day.year}-${day.month}-${day.day}';
 
-  storeIntervals(SMTIntervals data, DateTime day) {
+  void storeIntervals(SMTIntervals data, DateTime day) {
     _intervalsBox.put(_getKey(day), data);
   }
 
-  storeManyIntervals(Map<DateTime, SMTIntervals> data) {
+  void storeManyIntervals(Map<DateTime, SMTIntervals> data) {
     data.forEach((date, intervals) {
       storeIntervals(intervals, date);
     });
@@ -64,7 +64,7 @@ class SMTDataStore {
     return stored;
   }
 
-  resetIntervalsStore() {
+  void resetIntervalsStore() {
     _intervalsBox.clear();
   }
 
@@ -103,7 +103,7 @@ class SMTDataStore {
     return storedToken;
   }
 
-  setAccessToken(String token) {
+  void setAccessToken(String token) {
     _coreBox.put(accessTokenKey, token);
   }
 
@@ -111,11 +111,11 @@ class SMTDataStore {
     return _coreBox.get(cookiesKey);
   }
 
-  setCookies(String cookies) {
+  void setCookies(String cookies) {
     _coreBox.put(cookiesKey, cookies);
   }
 
-  removeCookies() {
+  void removeCookies() {
     _coreBox.delete(cookiesKey);
   }
 

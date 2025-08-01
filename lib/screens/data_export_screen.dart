@@ -8,7 +8,7 @@ import '../widgets/sts_drawer.dart';
 class DataExportScreen extends ConsumerWidget {
   static const String routeName = '/data-export-screen';
 
-  const DataExportScreen({Key? key}) : super(key: key);
+  const DataExportScreen({super.key});
 
   @override
   Widget build(context, ref) {

@@ -13,7 +13,7 @@ class EnphaseSystem {
   @HiveField(3)
   final String timezone;
   @HiveField(4)
-  final double? systemSize;
+  final num? systemSize;
   @HiveField(5)
   final DateTime operationalAtTime;
 

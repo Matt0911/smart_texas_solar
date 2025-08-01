@@ -54,12 +54,12 @@ class SMTIntervals {
     surplusMap = IntervalMap(surplusData);
   }
 
-  _addConsumptionInterval(Interval interval) {
+  void _addConsumptionInterval(Interval interval) {
     consumptionData.add(interval);
     consumptionMap.addInterval(interval);
   }
 
-  _addSurplusInterval(Interval interval) {
+  void _addSurplusInterval(Interval interval) {
     surplusData.add(interval);
     surplusMap.addInterval(interval);
   }

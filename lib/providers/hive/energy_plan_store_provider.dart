@@ -21,7 +21,7 @@ class EnergyPlanStore {
     return component;
   }
 
-  _init() async {
+  Future<void> _init() async {
     _box = await Hive.openBox<EnergyPlan>('energyPlans');
     // _box.flush();
     // _box.clear();

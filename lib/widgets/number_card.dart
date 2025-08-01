@@ -8,13 +8,13 @@ class NumberCard extends StatelessWidget {
   final int decimalPlaces;
 
   const NumberCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     this.valueUnits,
     required this.valueColor,
     this.decimalPlaces = 1,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -33,7 +33,7 @@ class EnphaseIntervals {
     generationMap = IntervalMap(generationData);
   }
 
-  _addInterval(Interval interval) {
+  void _addInterval(Interval interval) {
     generationData.add(interval);
     generationMap.addInterval(interval);
   }

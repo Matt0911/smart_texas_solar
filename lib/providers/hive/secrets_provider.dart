@@ -20,12 +20,12 @@ class HiveSecretsDB {
     return component;
   }
 
-  _init() async {
+  Future<void> _init() async {
     // TODO: use encrypted box
     _secretsBox = await Hive.openBox<Secrets>(secretsBoxName);
   }
 
-  storeSecrets(Secrets secrets) {
+  void storeSecrets(Secrets secrets) {
     _secretsBox.put(secretsBoxName, secrets);
   }
 

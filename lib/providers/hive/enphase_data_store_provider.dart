@@ -26,7 +26,7 @@ class EnphaseDataStore {
     return component;
   }
 
-  _init() async {
+  Future<void> _init() async {
     _coreBox = await Hive.openBox(coreBoxName);
     _intervalsBox = await Hive.openBox<EnphaseIntervals>(intervalsBoxName);
     // resetIntervalsStore();
@@ -34,11 +34,11 @@ class EnphaseDataStore {
 
   String _getIntervalKey(DateTime day) => '${day.year}-${day.month}-${day.day}';
 
-  storeIntervals(EnphaseIntervals data, DateTime day) {
+  void storeIntervals(EnphaseIntervals data, DateTime day) {
     _intervalsBox.put(_getIntervalKey(day), data);
   }
 
-  storeManyIntervals(Map<DateTime, EnphaseIntervals> data) {
+  void storeManyIntervals(Map<DateTime, EnphaseIntervals> data) {
     data.forEach((date, intervals) {
       storeIntervals(intervals, date);
     });
@@ -58,16 +58,16 @@ class EnphaseDataStore {
     return stored;
   }
 
-  resetIntervalsStore() {
+  void resetIntervalsStore() {
     _intervalsBox.clear();
   }
 
   EnphaseSystem? getSystemInfo() => _coreBox.get(systemInfoKey);
-  storeSystemInfo(EnphaseSystem systemInfo) {
+  void storeSystemInfo(EnphaseSystem systemInfo) {
     _coreBox.put(systemInfoKey, systemInfo);
   }
 
-  exportIntervals() {
+  Map<dynamic, Map<String, dynamic>> exportIntervals() {
     var intervalsMap = _intervalsBox.toMap();
     var result = intervalsMap.map((key, value) {
       return MapEntry(key, value.exportJson());
@@ -75,7 +75,7 @@ class EnphaseDataStore {
     return result;
   }
 
-  exportCore() {
+  Map exportCore() {
     var sysInfo = getSystemInfo();
     if (sysInfo == null) {
       return {};

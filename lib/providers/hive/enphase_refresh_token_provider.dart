@@ -44,13 +44,13 @@ class EnphaseTokenStore {
     return component;
   }
 
-  _init() async {
+  Future<void> _init() async {
     // TODO: use encrypted box
     _tokensBox = await Hive.openBox<EnphaseTokenResponse>(boxName);
     // _tokensBox.clear();
   }
 
-  storeTokens(EnphaseTokenResponse tokens) {
+  void storeTokens(EnphaseTokenResponse tokens) {
     _tokensBox.put(boxName, tokens);
   }
 

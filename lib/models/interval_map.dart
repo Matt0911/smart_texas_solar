@@ -66,19 +66,19 @@ class IntervalMap {
   num get totalKwh =>
       intervals.values.fold<num>(0, (sum, interval) => sum + interval.kwh);
 
-  addInterval(Interval interval) {
+  void addInterval(Interval interval) {
     var key = IntervalTime.values.byName(intervalTimeFormat
         .format(interval.endTime.subtract(const Duration(minutes: 15))));
     intervals[key] = interval;
   }
 
-  addIntervalMap(IntervalMap other) {
+  void addIntervalMap(IntervalMap other) {
     intervals.forEach((time, value) {
       value.kwh += other.intervals[time]!.kwh;
     });
   }
 
-  subtractIntervalMap(IntervalMap other) {
+  void subtractIntervalMap(IntervalMap other) {
     intervals.forEach((time, value) {
       value.kwh -= other.intervals[time]!.kwh;
     });
