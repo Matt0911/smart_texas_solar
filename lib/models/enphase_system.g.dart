@@ -21,7 +21,7 @@ class EnphaseSystemAdapter extends TypeAdapter<EnphaseSystem> {
       name: fields[1] as String,
       publicName: fields[2] as String,
       timezone: fields[3] as String,
-      systemSize: fields[4] as double?,
+      systemSize: fields[4] as num?,
       operationalAtTime: fields[5] as DateTime,
     );
   }
