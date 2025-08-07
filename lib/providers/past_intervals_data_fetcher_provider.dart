@@ -10,7 +10,7 @@ final pastIntervalsDataFetcherProvider =
 });
 
 class PastIntervalsFetcher extends StateNotifier<bool> {
-  Future<EnphaseApiService> enphaseApiServiceFuture;
+  Future<EnphaseApiService?> enphaseApiServiceFuture;
   Future<SMTApiService> smtApiServiceFuture;
   PastIntervalsFetcher(
       AutoDisposeStateNotifierProviderRef<PastIntervalsFetcher, bool> ref)
@@ -21,7 +21,7 @@ class PastIntervalsFetcher extends StateNotifier<bool> {
   }
 
   void _fetchPastIntervals() async {
-    EnphaseApiService enphaseApiService = await enphaseApiServiceFuture;
+    EnphaseApiService? enphaseApiService = await enphaseApiServiceFuture;
     SMTApiService smtApiService = await smtApiServiceFuture;
     DateTime currentEndDate = getDateFromToday(-3, true);
     DateTime twoYearsAgo = getDateFromToday(365 * -2, true);
@@ -37,11 +37,12 @@ class PastIntervalsFetcher extends StateNotifier<bool> {
         fetchStartDate = twoYearsAgo;
       }
       fetchStartDate = getStartOfDay(fetchStartDate);
-      var enphaseSavedData = enphaseApiService.getIntervalsSavedForDates(
+      var enphaseSavedData = enphaseApiService?.getIntervalsSavedForDates(
         fetchStartDate,
         currentEndDate,
       );
-      bool needsToFetchEnphase = enphaseSavedData == null;
+      bool needsToFetchEnphase =
+          enphaseApiService != null && enphaseSavedData == null;
       var smtSavedData = smtApiService.getIntervalsSavedForDates(
         fetchStartDate,
         currentEndDate,

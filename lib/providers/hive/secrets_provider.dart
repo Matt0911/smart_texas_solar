@@ -36,6 +36,7 @@ class HiveSecretsDB {
 
 @HiveType(typeId: 1)
 class Secrets {
+  // TODO: screen for smt user/pass
   @HiveField(0)
   String smtUser;
   @HiveField(1)

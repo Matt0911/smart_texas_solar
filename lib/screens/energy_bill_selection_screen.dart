@@ -92,7 +92,7 @@ class EnergyBillSelectionScreenState
           startDate: start,
           endDate: end,
         );
-        var enphaseIntervalsMap = await enphaseApiService.fetchIntervals(
+        var enphaseIntervalsMap = await enphaseApiService?.fetchIntervals(
           startDate: start,
           endDate: end,
         );
@@ -125,10 +125,12 @@ class EnergyBillSelectionScreenState
 
         num totalGeneration = 0;
         List<sts_interval.Interval> allGenerationIntervals = [];
-        for (var dayIntervals in enphaseIntervalsMap.values) {
-          allGenerationIntervals.addAll(dayIntervals.generationData);
-          totalGeneration += dayIntervals.generationData
-              .fold(0, (previousValue, element) => previousValue + element.kwh);
+        if (enphaseIntervalsMap != null) {
+          for (var dayIntervals in enphaseIntervalsMap.values) {
+            allGenerationIntervals.addAll(dayIntervals.generationData);
+            totalGeneration += dayIntervals.generationData.fold(
+                0, (previousValue, element) => previousValue + element.kwh);
+          }
         }
         IntervalMap periodGenerationByTime =
             IntervalMap(allGenerationIntervals);

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:smart_texas_solar/models/enphase_system.dart';
@@ -13,6 +11,7 @@ const String coreBoxName = 'enphaseData';
 const String intervalsBoxName = 'enphaseIntervals';
 const String systemIdKey = 'sysid';
 const String systemInfoKey = 'sysinfo';
+const String enphaseEnabledKey = 'enphaseDisabled';
 
 class EnphaseDataStore {
   late Box _coreBox;
@@ -67,6 +66,9 @@ class EnphaseDataStore {
     _coreBox.put(systemInfoKey, systemInfo);
   }
 
+  bool? isEnabled() => _coreBox.get(enphaseEnabledKey);
+  void setEnabled(bool enabled) => _coreBox.put(enphaseEnabledKey, enabled);
+
   Map<dynamic, Map<String, dynamic>> exportIntervals() {
     var intervalsMap = _intervalsBox.toMap();
     var result = intervalsMap.map((key, value) {
@@ -76,11 +78,13 @@ class EnphaseDataStore {
   }
 
   Map exportCore() {
+    var enabled = isEnabled();
     var sysInfo = getSystemInfo();
     if (sysInfo == null) {
       return {};
     }
     return {
+      enabled: enabled,
       systemInfoKey: sysInfo.exportJson(),
     };
   }
@@ -89,7 +93,7 @@ class EnphaseDataStore {
     Map<String, dynamic> data = {
       'enphase': {
         'intervals': exportIntervals(),
-        'system': exportCore(),
+        'core': exportCore(),
       }
     };
     return data;
@@ -102,7 +106,7 @@ class EnphaseDataStore {
         intervals.putIfAbsent(key, () => EnphaseIntervals.import(value));
       });
       Map<String, dynamic> coreData = {};
-      data['enphase']['system'].forEach((key, value) {
+      data['enphase']['core'].forEach((key, value) {
         if (key == systemInfoKey) {
           coreData.putIfAbsent(key, () => EnphaseSystem.import(value));
         }

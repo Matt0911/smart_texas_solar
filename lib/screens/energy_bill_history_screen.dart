@@ -75,7 +75,7 @@ class EnergyBillHistoryScreenState
           startDate: start,
           endDate: end,
         );
-        var enphaseIntervalsMap = await enphaseApiService.fetchIntervals(
+        var enphaseIntervalsMap = await enphaseApiService?.fetchIntervals(
           startDate: start,
           endDate: end,
         );
@@ -104,9 +104,11 @@ class EnergyBillHistoryScreenState
         }
 
         num totalGeneration = 0;
-        for (var dayIntervals in enphaseIntervalsMap.values) {
-          totalGeneration += dayIntervals.generationData
-              .fold(0, (previousValue, element) => previousValue + element.kwh);
+        if (enphaseIntervalsMap != null) {
+          for (var dayIntervals in enphaseIntervalsMap.values) {
+            totalGeneration += dayIntervals.generationData.fold(
+                0, (previousValue, element) => previousValue + element.kwh);
+          }
         }
 
         num totalConsumption =

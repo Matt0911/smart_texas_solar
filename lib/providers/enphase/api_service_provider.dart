@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:smart_texas_solar/models/enphase_system.dart';
@@ -6,14 +7,32 @@ import 'dart:convert' as convert;
 
 import 'package:smart_texas_solar/providers/hive/enphase_data_store_provider.dart';
 import 'package:smart_texas_solar/util/date_util.dart';
+import 'package:smart_texas_solar/util/navigator_key.dart';
+import 'package:smart_texas_solar/widgets/enable_enphase_dialog.dart';
 
 import '../../models/enphase_intervals.dart';
 
+Future<bool?> _promptEnableEnphase() async => await showDialog<bool>(
+      context: navigatorKey.currentContext!,
+      builder: (context) => EnableEnphaseDialog(),
+    );
+
 final enphaseApiServiceProvider =
-    FutureProvider.autoDispose<EnphaseApiService>((ref) async {
+    FutureProvider.autoDispose<EnphaseApiService?>((ref) async {
   var tokenService = await ref.watch(enphaseTokenServiceProvider.future);
   var enphaseDataStore = await ref.watch(enphaseDataStoreProvider.future);
-  return EnphaseApiService.create(tokenService, enphaseDataStore);
+  if (enphaseDataStore.isEnabled() == null) {
+    final shouldEnable = await _promptEnableEnphase();
+    if (shouldEnable == true) {
+      enphaseDataStore.setEnabled(true);
+      return EnphaseApiService.create(tokenService, enphaseDataStore);
+    } else {
+      if (shouldEnable == false) {
+        enphaseDataStore.setEnabled(false);
+      }
+      return null;
+    }
+  }
 });
 
 class EnphaseApiService {

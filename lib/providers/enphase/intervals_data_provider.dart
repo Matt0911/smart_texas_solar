@@ -6,9 +6,13 @@ import '../../models/enphase_intervals.dart';
 
 final enphaseIntervalsDataProvider =
     FutureProvider.autoDispose<Map<DateTime, EnphaseIntervals>>((ref) async {
-  EnphaseApiService apiService =
-      await ref.watch(enphaseApiServiceProvider.future);
   SelectedDates selectedDates = ref.watch(selectedDatesProvider);
+  EnphaseApiService? apiService =
+      await ref.watch(enphaseApiServiceProvider.future);
+
+  if (apiService == null) {
+    return {};
+  }
 
   return await apiService.fetchIntervals(
     startDate: selectedDates.startDate,

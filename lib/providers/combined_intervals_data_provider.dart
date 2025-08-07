@@ -46,14 +46,13 @@ List<CombinedInterval> _combineEnphaseAndSMTData(
   Map<DateTime, SMTIntervals> smtData,
   EnergyPlanStore energyPlanStore,
 ) {
-  assert(enphaseData.length == smtData.length);
   List<CombinedInterval> intervalList = [];
-  int sliceSize = _getNumberOfIntervalsToCombine(enphaseData.length);
-  for (var day in enphaseData.keys) {
+  int sliceSize = _getNumberOfIntervalsToCombine(smtData.length);
+  for (var day in smtData.keys) {
     // TODO: handle combining days together
-    var production = enphaseData[day]!.generationMap;
     var gridConsumption = smtData[day]!.consumptionMap;
     var surplusProduction = smtData[day]!.surplusMap;
+    var production = enphaseData[day]?.generationMap ?? IntervalMap.empty(day);
 
     for (int i = 0; i < IntervalTime.values.length; i += sliceSize) {
       var desiredTimes = IntervalTime.values.sublist(i, i + sliceSize);

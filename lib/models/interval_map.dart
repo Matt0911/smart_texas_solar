@@ -56,6 +56,10 @@ class IntervalMap {
       : intervals = _convertListToMap(
           _getFilteredIntervals(other.intervals, desiredTimes),
         );
+  IntervalMap.empty(DateTime date)
+      : intervals = _convertListToMap([
+          Interval(endTime: date, kwh: 0),
+        ]);
 
   Interval? getIntervalByDateTime(DateTime endDate) =>
       intervals[IntervalTime.values.byName(intervalTimeFormat
