@@ -37,6 +37,50 @@ class SMTApiService {
     return _dataStore.getStoredIntervals(dates);
   }
 
+  Future<String> _getESIID() async {
+    var esiid = _dataStore.getESIID();
+    if (esiid != null) return esiid;
+    var url = Uri.https('www.smartmetertexas.com', '/api/meter');
+    String token = await _tokenController.token;
+    String cookies = _dataStore.getCookies() ?? '';
+    var response = await http.post(
+      url,
+      body: {'esiid': '*'},
+      headers: {
+        'Authorization': 'Bearer $token',
+        'cookie': cookies,
+        'authority': 'www.smartmetertexas.com',
+        'accept': 'application/json, text/plain, */*',
+        'accept-language': 'en-US,en;q=0.9,vi;q=0.8',
+        'cache-control': 'no-cache',
+        // 'content-type': 'application/json;charset=UTF-8',
+        'origin': 'https://www.smartmetertexas.com',
+        'pragma': 'no-cache',
+        'referer': 'https://www.smartmetertexas.com/home',
+        'sec-ch-ua':
+            '"Microsoft Edge";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.35'
+      },
+    );
+    if (response.statusCode == 200) {
+      var jsonResponse =
+          convert.jsonDecode(response.body) as Map<String, dynamic>;
+
+      var esiid = jsonResponse['data'][0]['esiid'] as String;
+      _dataStore.setESIID(esiid);
+      return esiid;
+    } else {
+      print('Request failed with status: ${response.statusCode}.');
+      return Future.error('Failed to get token');
+    }
+  }
+
   Future<Map<DateTime, SMTIntervals>> fetchIntervals({
     required DateTime startDate,
     DateTime? endDate,
@@ -49,12 +93,14 @@ class SMTApiService {
     var url = Uri.https('www.smartmetertexas.com', '/api/usage/interval');
     String token = await _tokenController.token;
     String cookies = _dataStore.getCookies() ?? '';
+
+    var esiid = await _getESIID();
     var response = await http.post(
       url,
       body: {
         'startDate': _formatter.format(startDate),
         'endDate': _formatter.format(endDate ?? startDate),
-        'esiid': '10443720000461711', // TODO: dynamic
+        'esiid': esiid,
       },
       headers: {
         'Authorization': 'Bearer $token',

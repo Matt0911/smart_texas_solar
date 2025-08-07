@@ -32,7 +32,7 @@ class EnphaseTokenService {
   EnphaseTokenService.create(this._secretsDBFuture, this._enphaseTokenStore);
 
   Future<Map<String, String>> get clientAuthHeader async {
-    Secrets secrets = (await _secretsDBFuture).getSecrets();
+    Secrets secrets = await (await _secretsDBFuture).getSecrets();
     return {
       'authorization':
           'Basic ${base64Encode(utf8.encode('${secrets.enphaseClientId}:${secrets.enphaseClientSecret}'))}'
@@ -40,12 +40,12 @@ class EnphaseTokenService {
   }
 
   Future<Map<String, String>> get apiKeyQuery async {
-    Secrets secrets = (await _secretsDBFuture).getSecrets();
+    Secrets secrets = await (await _secretsDBFuture).getSecrets();
     return {'key': secrets.enphaseApiKey};
   }
 
   Future<EnphaseTokenResponse> _fetchTokens(String authCode) async {
-    Secrets secrets = (await _secretsDBFuture).getSecrets();
+    Secrets secrets = await (await _secretsDBFuture).getSecrets();
     var url = Uri.https('api.enphaseenergy.com', '/oauth/token', {
       'grant_type': 'authorization_code',
       'redirect_uri': 'https://api.enphaseenergy.com/oauth/redirect_uri',
@@ -78,7 +78,7 @@ class EnphaseTokenService {
   }
 
   Future<EnphaseTokenResponse> _fetchAuthCode() async {
-    Secrets secrets = (await _secretsDBFuture).getSecrets();
+    Secrets secrets = await (await _secretsDBFuture).getSecrets();
     String? authCode = await showDialog<String>(
       context: navigatorKey.currentContext!,
       builder: (context) =>

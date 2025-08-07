@@ -1,6 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:smart_texas_solar/secret_vals.dart' as secrets;
+import 'package:smart_texas_solar/util/navigator_key.dart';
+import 'package:smart_texas_solar/widgets/smt_credentials_dialog.dart';
 
 part 'secrets_provider.g.dart';
 
@@ -21,16 +24,39 @@ class HiveSecretsDB {
   }
 
   Future<void> _init() async {
-    // TODO: use encrypted box
-    _secretsBox = await Hive.openBox<Secrets>(secretsBoxName);
+    // Use HiveAesCipher for encryption. Store your encryption key securely.
+    final encryptionKey =
+        secrets.hiveEncryptionKey; // Should be a 32-byte Uint8List
+    _secretsBox = await Hive.openBox<Secrets>(
+      secretsBoxName,
+      encryptionCipher: HiveAesCipher(encryptionKey),
+    );
   }
 
   void storeSecrets(Secrets secrets) {
     _secretsBox.put(secretsBoxName, secrets);
   }
 
-  Secrets getSecrets() {
-    return _secretsBox.get(secretsBoxName) ?? Secrets();
+  Future<Secrets> getSecrets() async {
+    if (!_secretsBox.containsKey(secretsBoxName)) {
+      SMTCredentials? creds = null;
+
+      while (creds == null) {
+        creds = await showDialog<SMTCredentials>(
+          context: navigatorKey.currentContext!,
+          builder: (context) => SmtCredentialsDialog(),
+        );
+      }
+
+      storeSecrets(Secrets(
+        smtUser: creds.username,
+        smtPass: creds.password,
+        enphaseClientId: secrets.enphaseClientId,
+        enphaseClientSecret: secrets.enphaseClientSecret,
+        enphaseApiKey: secrets.enphaseApiKey,
+      ));
+    }
+    return _secretsBox.get(secretsBoxName);
   }
 }
 
@@ -49,8 +75,8 @@ class Secrets {
   String enphaseApiKey;
 
   Secrets({
-    this.smtUser = secrets.smtUser,
-    this.smtPass = secrets.smtPass,
+    required this.smtUser,
+    required this.smtPass,
     this.enphaseClientId = secrets.enphaseClientId,
     this.enphaseClientSecret = secrets.enphaseClientSecret,
     this.enphaseApiKey = secrets.enphaseApiKey,

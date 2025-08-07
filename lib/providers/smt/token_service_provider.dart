@@ -13,7 +13,7 @@ final homeUrl = WebUri('https://www.smartmetertexas.com/home');
 final smtTokenServiceProvider = FutureProvider<TokenService>((ref) async {
   var smtStore = await ref.watch(smtDataStoreProvider.future);
   var secretsDB = await ref.watch(secretsProvider.future);
-  Secrets secrets = secretsDB.getSecrets();
+  Secrets secrets = await secretsDB.getSecrets();
   return TokenService.create(secrets, smtStore);
 });
 

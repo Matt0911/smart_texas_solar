@@ -16,6 +16,7 @@ const String billingBoxName = 'smtBilling';
 
 const String accessTokenKey = 'accessToken';
 const String cookiesKey = 'cookies';
+const String esiidKey = 'esiid';
 
 class SMTDataStore {
   late Box<String> _coreBox; // TODO: storing esiid or stuff
@@ -107,6 +108,14 @@ class SMTDataStore {
     _coreBox.put(accessTokenKey, token);
   }
 
+  String? getESIID() {
+    return _coreBox.get(esiidKey);
+  }
+
+  void setESIID(String esiid) {
+    _coreBox.put(esiidKey, esiid);
+  }
+
   String? getCookies() {
     return _coreBox.get(cookiesKey);
   }
@@ -122,6 +131,7 @@ class SMTDataStore {
   Map<String, dynamic> exportData() {
     Map<String, dynamic> data = {
       'smt': {
+        'esiid': _coreBox.get(esiidKey),
         'intervals': _intervalsBox
             .toMap()
             .map((key, value) => MapEntry(key, value.exportJson())),
@@ -137,6 +147,9 @@ class SMTDataStore {
   bool importData(Map<String, dynamic> data) {
     try {
       Map<String, SMTIntervals> intervals = {};
+      if (data['smt']['esiid'] != null) {
+        setESIID(data['smt']['esiid']);
+      }
       data['smt']['intervals'].forEach((key, value) {
         intervals.putIfAbsent(key, () => SMTIntervals.import(value));
       });
